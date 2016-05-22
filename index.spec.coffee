@@ -37,3 +37,6 @@ describe '$bind with object', ->
   it 'should create a self link with custom id function', ->
     api.$bind john, id
     expect(john._links.self).toBe 'http://localhost/john'
+  it 'should have an overridable url', ->
+    api.$bind john, null, 'http://remotehost'
+    expect(john._links.self).toBe 'http://remotehost'
