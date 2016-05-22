@@ -1,0 +1,34 @@
+{
+  "name": "hybind",
+  "version": "1.0.0",
+  "description": "Binds javascript objects to HAL hypermedia REST APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine-node --coffee .",
+    "prepublish": "coffee -c index.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lbovet/hybind.git"
+  },
+  "keywords": [
+    "HAL",
+    "REST",
+    "API",
+    "spring-data-rest"
+  ],
+  "author": "Laurent Bovet <laurent.bovet@windmaster.ch>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/lbovet/hybind/issues"
+  },
+  "homepage": "https://github.com/lbovet/hybind#readme",
+  "dependencies": {
+    "lodash": "^4.12.0",
+    "q": "^1.4.1",
+    "request": "^2.72.0"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5"
+  }
+}
