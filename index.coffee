@@ -15,17 +15,31 @@
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
+  idFn = null
   enrich = (obj, url) ->
     if url
       obj._links =
         self: url
-    obj.$declare = (link, pathOrUrl) ->
+    obj.$bind = () ->
+      args = Array.prototype.slice.call(arguments);
+      if typeof args[0] == 'object'
+        target = args[0]
+        args.shift()
+      else
+        obj[args[0]] = {}
+        target = obj[args[0]]
+      link = args[0]
+      link = link target if typeof link == 'function'
+      link ?= idFn target
+      pathOrUrl = args[1]
       pathOrUrl ?= link
-      obj[link] = {}
-      enrich obj[link], makeUrl selfLink(obj), pathOrUrl
+      enrich target, makeUrl selfLink(obj), pathOrUrl
     obj
   hybind = (url) ->
-    enrich {}, url
+    root =
+      $id: (fn) ->
+        idFn = fn
+    enrich root, url
   hybind.extend = extend
   hybind.request = request
   hybind.q = q
