@@ -15,27 +15,28 @@
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
-  idFn = null
-  enrich = (obj, url) ->
-    if url
-      obj._links =
-        self: url
-    obj.$bind = () ->
-      args = Array.prototype.slice.call(arguments);
-      if typeof args[0] == 'object'
-        target = args[0]
-        args.shift()
-      else
-        obj[args[0]] = {}
-        target = obj[args[0]]
-      link = args[0]
-      link = link target if typeof link == 'function'
-      link ?= idFn target
-      pathOrUrl = args[1]
-      pathOrUrl ?= link
-      enrich target, makeUrl selfLink(obj), pathOrUrl
-    obj
   hybind = (url) ->
+    idFn = () ->
+      throw 'No id function defined'
+    enrich = (obj, url) ->
+      if url
+        obj._links =
+          self: url
+      obj.$bind = () ->
+        args = Array.prototype.slice.call(arguments);
+        if typeof args[0] == 'object'
+          target = args[0]
+          args.shift()
+        else
+          obj[args[0]] = {}
+          target = obj[args[0]]
+        link = args[0]
+        link = link target if typeof link == 'function'
+        link = idFn target if link is undefined
+        pathOrUrl = args[1]
+        pathOrUrl ?= link
+        enrich target, makeUrl selfLink(obj), pathOrUrl
+      obj
     root =
       $id: (fn) ->
         idFn = fn
