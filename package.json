@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/lbovet/hybind#readme",
   "dependencies": {
-    "lodash": "^4.12.0",
+    "lodash": "^4.11.0",
     "q": "^1.4.1",
     "request": "^2.72.0"
   },

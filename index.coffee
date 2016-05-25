@@ -10,19 +10,21 @@
     ]
   else
     root.hybind = factory(root._?.extend, root.Q, root.request)
-) this, (extend, q, request) ->
-  selfLink = (obj) -> obj._links.self
+) this, (extend, Q, request) ->
+  selfLink = (obj) -> obj._links.self.href
+  stringify = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
   hybind = (url) ->
-    idFn = () ->
+    idFn = ->
       throw 'No id function defined'
     enrich = (obj, url) ->
       if url
-        obj._links =
-          self: url
-      obj.$bind = () ->
+        obj._links = self: href: url
+      obj.$collection = (link) ->
+        obj
+      obj.$bind = ->
         args = Array.prototype.slice.call(arguments);
         if typeof args[0] == 'object'
           target = args[0]
@@ -36,6 +38,34 @@
         pathOrUrl = args[1]
         pathOrUrl ?= link
         enrich target, makeUrl selfLink(obj), pathOrUrl
+      obj.$load = ->
+        d = Q.defer()
+        hybind.request
+          method: 'GET', uri: selfLink obj
+        .then (data) ->
+          for prop of obj
+            if prop.indexOf('_') != 0 and typeof obj[prop] != 'function'
+              delete obj[prop]
+          hybind.extend obj, data
+          if data?._links
+            for name, link of data._links
+              if name != 'self'
+                p = obj[name] = {}
+                obj.$bind p, link.href
+          d.resolve obj
+        d.promise
+      obj.$save = ->
+        d = Q.defer()
+        hybind.request
+          method: 'PUT', uri: selfLink(obj), data: stringify(obj)
+        .then d.resolve
+        d.promise
+      obj.$delete = ->
+        d = Q.defer()
+        hybind.request
+          method: 'DELETE', uri: selfLink(obj)
+        .then d.resolve
+        d.promise
       obj
     root =
       $id: (fn) ->
@@ -43,5 +73,5 @@
     enrich root, url
   hybind.extend = extend
   hybind.request = request
-  hybind.q = q
+  hybind.q = Q
   hybind
