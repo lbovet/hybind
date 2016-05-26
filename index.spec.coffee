@@ -46,11 +46,15 @@ describe 'hybind', ->
       it 'should fail if id function is missing', ->
         expect(-> api.$bind john).toThrow 'No id function defined'
 
-    xdescribe 'collection', ->
-      it 'should map collections', ->
-        api.addresses = []
-        api.$bind 'addresses'
-        expect(typeof api.addresses).toBe 'array'
+    describe 'collections', ->
+      it 'should be supported as parameter', ->
+        addresses = []
+        api.$bind addresses, 'addresses'
+        expect(addresses._links.self.href).toBe 'http://localhost/addresses'
+      it 'should be supported as property', ->
+        addresses = []
+        api.$bind 'addresses', addresses
+        expect(api.addresses).toBe addresses
 
   describe 'operations', ->
     beforeEach ->

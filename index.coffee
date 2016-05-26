@@ -19,22 +19,31 @@
   hybind = (url) ->
     idFn = ->
       throw 'No id function defined'
+    collMapper = (obj, coll) ->
+      if obj._embedded
+        for k,v in obj._embedded
+          
+          break
     enrich = (obj, url) ->
       if url
         obj._links = self: href: url
-      obj.$collection = (link) ->
-        obj
       obj.$bind = ->
         args = Array.prototype.slice.call(arguments);
-        if typeof args[0] == 'object'
-          target = args[0]
+        arg = args[0]
+        if typeof arg is 'object'
+          target = arg
           args.shift()
         else
-          obj[args[0]] = {}
-          target = obj[args[0]]
+          prop = arg
+          target = obj[prop] = {}
         link = args[0]
-        link = link target if typeof link == 'function'
+        link = link target if typeof link is 'function'
         link = idFn target if link is undefined
+        arg = args[1]
+        if typeof arg is 'object'
+          target = arg
+          obj[prop] = target if prop
+          args.shift()
         pathOrUrl = args[1]
         pathOrUrl ?= link
         enrich target, makeUrl selfLink(obj), pathOrUrl
