@@ -11,7 +11,7 @@
   else
     root.hybind = factory(root._?.extend, root.Q, root.request)
 ) this, (extend, Q, request) ->
-  selfLink = (obj) -> obj._links.self.href
+  selfLink = (obj) -> obj?._links?.self?.href
   stringify = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
@@ -20,9 +20,13 @@
     idFn = ->
       throw 'No id function defined'
     collMapper = (obj, coll) ->
+      coll.length = 0
       if obj._embedded
-        for k,v in obj._embedded
-          
+        for k,v of obj._embedded
+          for item in v
+            coll.push item
+            link = selfLink item
+            enrich item, link if link
           break
     enrich = (obj, url) ->
       if url
@@ -52,15 +56,18 @@
         hybind.request
           method: 'GET', uri: selfLink obj
         .then (data) ->
-          for prop of obj
-            if prop.indexOf('_') != 0 and typeof obj[prop] != 'function'
-              delete obj[prop]
-          hybind.extend obj, data
-          if data?._links
-            for name, link of data._links
-              if name != 'self'
-                p = obj[name] = {}
-                obj.$bind p, link.href
+          if (obj instanceof Array)
+            collMapper data, obj
+          else
+            for prop of obj
+              if prop.indexOf('_') != 0 and typeof obj[prop] != 'function'
+                delete obj[prop]
+            hybind.extend obj, data
+            if data?._links
+              for name, link of data._links
+                if name != 'self'
+                  p = obj[name] = {}
+                  obj.$bind p, link.href
           d.resolve obj
         d.promise
       obj.$save = ->
@@ -72,7 +79,14 @@
       obj.$delete = ->
         d = Q.defer()
         hybind.request
-          method: 'DELETE', uri: selfLink(obj)
+          method: 'DELETE', uri: selfLink obj
+        .then d.resolve
+        d.promise
+      removeLink = selfLink obj
+      obj.$remove = ->
+        d = Q.defer()
+        hybind.request
+          method: 'DELETE', uri: removeLink
         .then d.resolve
         d.promise
       obj
