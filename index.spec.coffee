@@ -5,8 +5,8 @@ describe 'hybind', ->
     @hybind = require './index.coffee'
     @api = @hybind 'http://localhost'
     @john = name: 'john'
-    @request = jasmine.createSpy('request').andReturn Q()
-    @hybind.request = @request
+    @http = jasmine.createSpy('http').andReturn Q()
+    @hybind.http = @http
 
   describe 'root api', ->
     it 'should have self link', ->
@@ -61,20 +61,20 @@ describe 'hybind', ->
     describe '$load', ->
       it 'should issue a GET request', ->
         @john.$load()
-        expect(@request).toHaveBeenCalledWith jasmine.objectContaining
-          method: 'GET', uri: 'http://localhost/john'
+        expect(@http).toHaveBeenCalledWith jasmine.objectContaining
+          method: 'GET', url: 'http://localhost/john'
 
       it 'should support parameters', ->
         @john.$load p: true
-        expect(@request).toHaveBeenCalledWith jasmine.objectContaining
-          method: 'GET', uri: 'http://localhost/john?p=true'
-        @request.reset()
+        expect(@http).toHaveBeenCalledWith jasmine.objectContaining
+          method: 'GET', url: 'http://localhost/john?p=true'
+        @http.reset()
         @api.$bind("paul?v=1").$load p: true
-        expect(@request).toHaveBeenCalledWith jasmine.objectContaining
-          method: 'GET', uri: 'http://localhost/paul?v=1&p=true'
+        expect(@http).toHaveBeenCalledWith jasmine.objectContaining
+          method: 'GET', url: 'http://localhost/paul?v=1&p=true'
 
       it 'should replace the object content but not remove the $ functions and links', (done) ->
-        @request.andReturn Q age: 22
+        @http.andReturn Q age: 22
         john = @john
         john.$load().then (newJohn) ->
           expect(john).toBe newJohn
@@ -84,13 +84,13 @@ describe 'hybind', ->
           expect(john._links).toBeDefined()
           done()
       it 'should replace the links if they are present', (done) ->
-        @request.andReturn Q _links: self: href: 'http://remotehost/john'
+        @http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
           expect(john._links.self.href).toBe 'http://remotehost/john'
           done()
       it 'should create properties from links', (done) ->
-        @request.andReturn Q _links:
+        @http.andReturn Q _links:
           self: href: @john._links.self.href
           address: href: 'http://localhost/john/address'
         john = @john
@@ -101,59 +101,59 @@ describe 'hybind', ->
 
     describe '$save', ->
       it 'should issue a PUT request', (done) ->
-        request = @request
+        http = @http
         @john.$save().then ->
-          expect(request).toHaveBeenCalledWith jasmine.objectContaining
-            method: 'PUT', uri: 'http://localhost/john'
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT', url: 'http://localhost/john'
             data: JSON.stringify name: 'john'
             headers: { 'Content-Type': 'application/json' }
           done()
 
     describe '$delete', ->
       it 'should issue a DELETE request', (done) ->
-        request = @request
+        http = @http
         @john.$delete().then ->
-          expect(request).toHaveBeenCalledWith jasmine.objectContaining
-            method: 'DELETE', uri: 'http://localhost/john'
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'DELETE', url: 'http://localhost/john'
           done()
       it 'should DELETE the loaded self link', (done) ->
-        request = @request
-        request.andReturn Q _links: self: href: 'http://remotehost/john'
+        http = @http
+        http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
-          request.andReturn Q()
+          http.andReturn Q()
           john.$delete().then ->
-            expect(request).toHaveBeenCalledWith jasmine.objectContaining
-              method: 'DELETE', uri: 'http://remotehost/john'
+            expect(http).toHaveBeenCalledWith jasmine.objectContaining
+              method: 'DELETE', url: 'http://remotehost/john'
             done()
 
     describe '$remove', ->
       it 'should issue a DELETE request', (done) ->
-        request = @request
+        http = @http
         @john.$remove().then ->
-          expect(request).toHaveBeenCalledWith jasmine.objectContaining
-            method: 'DELETE', uri: 'http://localhost/john'
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'DELETE', url: 'http://localhost/john'
           done()
       it 'should DELETE the original link of loaded objects', (done) ->
-        request = @request
-        request.andReturn Q _links: self: href: 'http://remotehost/john'
+        http = @http
+        http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
-          request.reset()
+          http.reset()
           john.$remove().then ->
-            expect(request).toHaveBeenCalledWith jasmine.objectContaining
-              method: 'DELETE', uri: 'http://localhost/john'
+            expect(http).toHaveBeenCalledWith jasmine.objectContaining
+              method: 'DELETE', url: 'http://localhost/john'
             done()
 
     describe '$set', ->
       it 'should issue a PUT request', (done) ->
-        request = @request
+        http = @http
         paul = @api.$bind "paul"
         father = @john.$bind "father"
         father.$set(paul).then ->
-          expect(request).toHaveBeenCalledWith jasmine.objectContaining
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT'
-            uri: 'http://localhost/john/father'
+            url: 'http://localhost/john/father'
             data: 'http://localhost/paul'
           done()
 
@@ -165,7 +165,7 @@ describe 'hybind', ->
     describe '$load', ->
       it 'should map collections', (done) ->
         addresses = @addresses
-        @request.andReturn Q
+        @http.andReturn Q
           _links:
             self: href: addresses._links.self
           _embedded:
@@ -186,23 +186,23 @@ describe 'hybind', ->
     describe '$add', ->
       it 'single item should issue POST', (done) ->
         addresses = @addresses
-        request = @request
+        http = @http
         item = city: 'New York', _links: self: href: "http://localhost/newyork"
         addresses.$add(item).then ->
-          expect(request).toHaveBeenCalledWith jasmine.objectContaining
-            method: 'POST', uri: 'http://localhost/addresses'
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', url: 'http://localhost/addresses'
             data: 'http://localhost/newyork'
           done()
 
       it 'items should issue POST', (done) ->
         addresses = @addresses
-        request = @request
+        http = @http
         items = [
           { city: 'New York', _links: self: href: "http://localhost/newyork" },
           { city: 'New Dehli', _links: self: href: "http://localhost/newdehli" } ]
         addresses.$add(items).then ->
-          expect(request).toHaveBeenCalledWith jasmine.objectContaining
-            method: 'POST', uri: 'http://localhost/addresses'
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', url: 'http://localhost/addresses'
             data: 'http://localhost/newyork\nhttp://localhost/newdehli'
             headers: { 'Content-Type': 'text/uri-list' }
           done()

@@ -1,14 +1,18 @@
 ((root, factory) ->
   if typeof define == 'function' and define.amd # AMD
-    define [ 'jQuery', 'q', 'jQuery' ], factory
+    define [ 'jquery' ], factory
   else if typeof module == 'object' and module.exports # Node
-    module.exports = factory(require('lodash').extend, require('q'), ajax: require('najax'))
-  else if root.angular
+    module.exports = factory require('lodash'), require('q').defer, require('najax')
+  else if root.angular # AngularJS
     root.angular.module('hybind', []).factory 'api', ['$q', '$http',
-     (q, http) -> factory angular.extend, $q, ajax: $http ]
+     (q, http) -> factory root.angular, $q.defer, $http ]
   else
-    root.hybind = factory(root._?.extend, root.Q, root.request)
-) this, (extend, Q, j) ->
+    root.hybind = factory(root.jQuery or root.$)
+) this, (fw, deferred, http) ->
+  extend = fw.extend
+  promise = if deferred then (d) -> d.promise else (d) -> d.promise()
+  deferred ?= fw.Deferred
+  http ?= fw.ajax
   selfLink = (obj) -> obj?._links?.self?.href
   str = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
   makeUrl = (baseUrl, pathOrUrl) ->
@@ -26,17 +30,15 @@
             enrich item, link if link
           break
     req = (opts, params) ->
-      d = Q.defer()
       if typeof opts.data == 'string'
         opts.headers = { 'Content-Type': 'text/uri-list' }
       if typeof opts.data == 'object'
         opts.headers = { 'Content-Type': 'application/json' }
         opts.data = str opts.data
       if params
-        sep = if opts.uri.indexOf('?') == -1 then '?' else '&'
-        opts.uri = opts.uri + sep + ((k+"="+v) for k,v of params).join("&")
-      hybind.request(opts).then d.resolve
-      d.promise
+        sep = if opts.url.indexOf('?') == -1 then '?' else '&'
+        opts.url = opts.url + sep + ((k+"="+v) for k,v of params).join("&")
+      hybind.http opts
     enrich = (obj, url) ->
       if url then obj._links = self: href: url
       obj.$bind = ->
@@ -60,8 +62,8 @@
         pathOrUrl ?= link
         enrich target, makeUrl selfLink(obj), pathOrUrl
       obj.$load = (params) ->
-        d = Q.defer()
-        req {method: 'GET', uri: selfLink obj}, params
+        d = deferred()
+        req {method: 'GET', url: selfLink obj}, params
         .then (data) ->
           if (obj instanceof Array)
             collMapper data, obj
@@ -69,30 +71,27 @@
             for prop of obj
               if prop.indexOf('_') != 0 and typeof obj[prop] != 'function'
                 delete obj[prop]
-            hybind.extend obj, data
+            extend obj, data
             if data?._links
               for name, link of data._links
                 if name != 'self'
                   p = obj[name] = {}
                   obj.$bind p, link.href
           d.resolve obj
-        d.promise
+        promise d
       if (obj instanceof Array)
         obj.$add = (items) ->
           items = [ items ] if not (items instanceof Array)
           data = (selfLink item for item in items)
-          console.log data
-          req method: 'POST', uri: selfLink(obj), data: data.join '\n'
+          req method: 'POST', url: selfLink(obj), data: data.join '\n'
       else
-        obj.$set = (item) -> req method: 'PUT', uri: selfLink(obj), data: selfLink item
-      obj.$save = -> req method: 'PUT', uri: selfLink(obj), data: obj
-      obj.$delete = -> req method: 'DELETE', uri: selfLink(obj)
+        obj.$set = (item) -> req method: 'PUT', url: selfLink(obj), data: selfLink item
+      obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
+      obj.$delete = -> req method: 'DELETE', url: selfLink(obj)
       removeLink = selfLink obj
-      obj.$remove = -> req method: 'DELETE', uri: removeLink
+      obj.$remove = -> req method: 'DELETE', url: removeLink
       obj
     root = $id: (fn) -> idFn = fn
     enrich root, url
-  hybind.extend = extend
-  hybind.request = j.ajax
-  hybind.q = Q
+  hybind.http = http
   hybind
