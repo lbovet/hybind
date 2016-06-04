@@ -12,13 +12,12 @@
     root.hybind = factory(root._?.extend, root.Q, root.request)
 ) this, (extend, Q, request) ->
   selfLink = (obj) -> obj?._links?.self?.href
-  stringify = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
+  str = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
   hybind = (url) ->
-    idFn = ->
-      throw 'No id function defined'
+    idFn = -> throw 'No id function defined'
     collMapper = (obj, coll) ->
       coll.length = 0
       if obj._embedded
@@ -28,11 +27,15 @@
             link = selfLink item
             enrich item, link if link
           break
+    req = (opts) ->
+      d = Q.defer()
+      hybind.request opts
+      .then d.resolve
+      d.promise
     enrich = (obj, url) ->
-      if url
-        obj._links = self: href: url
+      if url then obj._links = self: href: url
       obj.$bind = ->
-        args = Array.prototype.slice.call(arguments);
+        args = Array.prototype.slice.call arguments
         arg = args[0]
         if typeof arg is 'object'
           target = arg
@@ -53,8 +56,7 @@
         enrich target, makeUrl selfLink(obj), pathOrUrl
       obj.$load = ->
         d = Q.defer()
-        hybind.request
-          method: 'GET', uri: selfLink obj
+        req method: 'GET', uri: selfLink obj
         .then (data) ->
           if (obj instanceof Array)
             collMapper data, obj
@@ -70,29 +72,20 @@
                   obj.$bind p, link.href
           d.resolve obj
         d.promise
+      if (obj instanceof Array)
+        
+        obj.$add = ->
+
       obj.$save = ->
-        d = Q.defer()
-        hybind.request
-          method: 'PUT', uri: selfLink(obj), data: stringify(obj)
-        .then d.resolve
-        d.promise
-      obj.$delete = ->
-        d = Q.defer()
-        hybind.request
-          method: 'DELETE', uri: selfLink obj
-        .then d.resolve
-        d.promise
+        if (obj instanceof Array)
+
+        else
+          req method: 'PUT', uri: selfLink obj, data: str obj
+      obj.$delete = -> req method: 'DELETE', uri: selfLink obj
       removeLink = selfLink obj
-      obj.$remove = ->
-        d = Q.defer()
-        hybind.request
-          method: 'DELETE', uri: removeLink
-        .then d.resolve
-        d.promise
+      obj.$remove = -> req method: 'DELETE', uri: removeLink
       obj
-    root =
-      $id: (fn) ->
-        idFn = fn
+    root = $id: (fn) -> idFn = fn
     enrich root, url
   hybind.extend = extend
   hybind.request = request

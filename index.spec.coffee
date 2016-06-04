@@ -123,7 +123,7 @@ describe 'hybind', ->
           expect(request).toHaveBeenCalledWith jasmine.objectContaining
             method: 'DELETE', uri: 'http://localhost/john'
           done()
-      it 'should DELETE the original link', (done) ->
+      it 'should DELETE the original link of loaded objects', (done) ->
         request = @request
         request.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
