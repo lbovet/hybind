@@ -1,16 +1,14 @@
 ((root, factory) ->
   if typeof define == 'function' and define.amd # AMD
-    define [ 'lodash', 'q', 'request' ], factory
+    define [ 'jQuery', 'q', 'jQuery' ], factory
   else if typeof module == 'object' and module.exports # Node
-    module.exports = factory(require('lodash').extend, require('q'), require('request'))
+    module.exports = factory(require('lodash').extend, require('q'), ajax: require('najax'))
   else if root.angular
     root.angular.module('hybind', []).factory 'api', ['$q', '$http',
-     (q, http) ->
-       factory angular.extend, $q, $http
-    ]
+     (q, http) -> factory angular.extend, $q, ajax: $http ]
   else
     root.hybind = factory(root._?.extend, root.Q, root.request)
-) this, (extend, Q, request) ->
+) this, (extend, Q, j) ->
   selfLink = (obj) -> obj?._links?.self?.href
   str = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
   makeUrl = (baseUrl, pathOrUrl) ->
@@ -27,10 +25,17 @@
             link = selfLink item
             enrich item, link if link
           break
-    req = (opts) ->
+    req = (opts, params) ->
       d = Q.defer()
-      hybind.request opts
-      .then d.resolve
+      if typeof opts.data == 'string'
+        opts.headers = { 'Content-Type': 'text/uri-list' }
+      if typeof opts.data == 'object'
+        opts.headers = { 'Content-Type': 'application/json' }
+        opts.data = str opts.data
+      if params
+        sep = if opts.uri.indexOf('?') == -1 then '?' else '&'
+        opts.uri = opts.uri + sep + ((k+"="+v) for k,v of params).join("&")
+      hybind.request(opts).then d.resolve
       d.promise
     enrich = (obj, url) ->
       if url then obj._links = self: href: url
@@ -54,9 +59,9 @@
         pathOrUrl = args[1]
         pathOrUrl ?= link
         enrich target, makeUrl selfLink(obj), pathOrUrl
-      obj.$load = ->
+      obj.$load = (params) ->
         d = Q.defer()
-        req method: 'GET', uri: selfLink obj
+        req {method: 'GET', uri: selfLink obj}, params
         .then (data) ->
           if (obj instanceof Array)
             collMapper data, obj
@@ -73,21 +78,21 @@
           d.resolve obj
         d.promise
       if (obj instanceof Array)
-        
-        obj.$add = ->
-
-      obj.$save = ->
-        if (obj instanceof Array)
-
-        else
-          req method: 'PUT', uri: selfLink obj, data: str obj
-      obj.$delete = -> req method: 'DELETE', uri: selfLink obj
+        obj.$add = (items) ->
+          items = [ items ] if not (items instanceof Array)
+          data = (selfLink item for item in items)
+          console.log data
+          req method: 'POST', uri: selfLink(obj), data: data.join '\n'
+      else
+        obj.$set = (item) -> req method: 'PUT', uri: selfLink(obj), data: selfLink item
+      obj.$save = -> req method: 'PUT', uri: selfLink(obj), data: obj
+      obj.$delete = -> req method: 'DELETE', uri: selfLink(obj)
       removeLink = selfLink obj
       obj.$remove = -> req method: 'DELETE', uri: removeLink
       obj
     root = $id: (fn) -> idFn = fn
     enrich root, url
   hybind.extend = extend
-  hybind.request = request
+  hybind.request = j.ajax
   hybind.q = Q
   hybind

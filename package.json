@@ -25,8 +25,8 @@
   "homepage": "https://github.com/lbovet/hybind#readme",
   "dependencies": {
     "lodash": "^4.11.0",
-    "q": "^1.4.1",
-    "request": "^2.72.0"
+    "najax": "^0.7.0",
+    "q": "^1.4.1"
   },
   "devDependencies": {
     "coffee-script": "^1.10.0",

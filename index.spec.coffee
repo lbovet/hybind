@@ -63,6 +63,16 @@ describe 'hybind', ->
         @john.$load()
         expect(@request).toHaveBeenCalledWith jasmine.objectContaining
           method: 'GET', uri: 'http://localhost/john'
+
+      it 'should support parameters', ->
+        @john.$load p: true
+        expect(@request).toHaveBeenCalledWith jasmine.objectContaining
+          method: 'GET', uri: 'http://localhost/john?p=true'
+        @request.reset()
+        @api.$bind("paul?v=1").$load p: true
+        expect(@request).toHaveBeenCalledWith jasmine.objectContaining
+          method: 'GET', uri: 'http://localhost/paul?v=1&p=true'
+
       it 'should replace the object content but not remove the $ functions and links', (done) ->
         @request.andReturn Q age: 22
         john = @john
@@ -95,7 +105,8 @@ describe 'hybind', ->
         @john.$save().then ->
           expect(request).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', uri: 'http://localhost/john'
-            JSON.stringify data: name: 'john'
+            data: JSON.stringify name: 'john'
+            headers: { 'Content-Type': 'application/json' }
           done()
 
     describe '$delete', ->
@@ -134,6 +145,18 @@ describe 'hybind', ->
               method: 'DELETE', uri: 'http://localhost/john'
             done()
 
+    describe '$set', ->
+      it 'should issue a PUT request', (done) ->
+        request = @request
+        paul = @api.$bind "paul"
+        father = @john.$bind "father"
+        father.$set(paul).then ->
+          expect(request).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT'
+            uri: 'http://localhost/john/father'
+            data: 'http://localhost/paul'
+          done()
+
   describe 'operations on collections', ->
     beforeEach ->
       @addresses = []
@@ -158,4 +181,28 @@ describe 'hybind', ->
           expect(addresses[1].city).toBe 'Paris'
           expect(addresses[0].$load).toBeDefined()
           expect(addresses[1].$load).toBeUndefined()
+          done()
+
+    describe '$add', ->
+      it 'single item should issue POST', (done) ->
+        addresses = @addresses
+        request = @request
+        item = city: 'New York', _links: self: href: "http://localhost/newyork"
+        addresses.$add(item).then ->
+          expect(request).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', uri: 'http://localhost/addresses'
+            data: 'http://localhost/newyork'
+          done()
+
+      it 'items should issue POST', (done) ->
+        addresses = @addresses
+        request = @request
+        items = [
+          { city: 'New York', _links: self: href: "http://localhost/newyork" },
+          { city: 'New Dehli', _links: self: href: "http://localhost/newdehli" } ]
+        addresses.$add(items).then ->
+          expect(request).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', uri: 'http://localhost/addresses'
+            data: 'http://localhost/newyork\nhttp://localhost/newdehli'
+            headers: { 'Content-Type': 'text/uri-list' }
           done()
