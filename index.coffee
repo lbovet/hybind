@@ -87,6 +87,13 @@
       else
         obj.$set = (item) -> req method: 'PUT', url: selfLink(obj), data: selfLink item
       obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
+      obj.$create = (item) ->
+        d = deferred()
+        req method: 'POST', url: selfLink(obj), data: item or {}
+        .then (data) ->
+          extend item, data if item
+          d.resolve item or data
+        promise d
       obj.$delete = -> req method: 'DELETE', url: selfLink(obj)
       removeLink = selfLink obj
       obj.$remove = -> req method: 'DELETE', url: removeLink

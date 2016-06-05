@@ -127,6 +127,28 @@ describe 'hybind', ->
               method: 'DELETE', url: 'http://remotehost/john'
             done()
 
+    describe '$create', ->
+      it 'without argument should POST empty object', (done) ->
+        http = @http
+        http.andReturn Q _links: self: href: 'http://localhost/1'
+        @api.$create().then (obj) ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', url: 'http://localhost', data: "{}"
+          expect(obj._links.self.href).toBe 'http://localhost/1'
+          done()
+
+      it 'with argument should POST given object', (done) ->
+        http = @http
+        http.andReturn Q name: 'bob', _links: self: href: 'http://localhost/1'
+        bob = name: 'bob'
+        @api.$create(bob).then (obj) ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', url: 'http://localhost',
+            data: JSON.stringify name: 'bob'
+          expect(obj._links.self.href).toBe 'http://localhost/1'
+          expect(bob._links?.self?.href).toBe 'http://localhost/1'
+          done()
+
     describe '$remove', ->
       it 'should issue a DELETE request', (done) ->
         http = @http
