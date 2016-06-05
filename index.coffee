@@ -49,12 +49,12 @@
         sep = if opts.url.indexOf('?') == -1 then '?' else '&'
         opts.url = opts.url + sep + ((k+"="+v) for k,v of params).join("&")
       hybind.http(opts).then (data, s, r) ->
-        #console.log opts, data, s, r
         try
           if typeof data == 'string' and data != ''
             data = JSON.parse(data)
         catch e
           d.reject e
+        #console.log opts, data, s, r
         d.resolve data
       , d.reject
       promise d
