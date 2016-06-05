@@ -18,7 +18,10 @@
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
-  hybind = (url) ->
+  hybind = (url, defaults) ->
+    defaults ?= {}
+    defaults.headers ?= {}
+    extend defaults.headers, Accept: 'application/json'
     idFn = -> throw 'No id function defined'
     collMapper = (obj, coll) ->
       coll.length = 0
@@ -29,16 +32,32 @@
             link = selfLink item
             enrich item, link if link
           break
-    req = (opts, params) ->
+    req = (r, params) ->
+      d = deferred()
+      opts = {}
+      extend opts, defaults
+      headers = opts.headers
+      extend opts, r
+      opts.headers = headers or {}
+      extend(opts.headers, r.headers) if r.headers
       if typeof opts.data == 'string'
-        opts.headers = { 'Content-Type': 'text/uri-list' }
+        extend opts.headers, { 'Content-Type': 'text/uri-list' }
       if typeof opts.data == 'object'
-        opts.headers = { 'Content-Type': 'application/json' }
+        extend opts.headers, { 'Content-Type': 'application/json' }
         opts.data = str opts.data
       if params
         sep = if opts.url.indexOf('?') == -1 then '?' else '&'
         opts.url = opts.url + sep + ((k+"="+v) for k,v of params).join("&")
-      hybind.http opts
+      hybind.http(opts).then (data, s, r) ->
+        #console.log opts, data, s, r
+        try
+          if typeof data == 'string' and data != ''
+            data = JSON.parse(data)
+        catch e
+          d.reject e
+        d.resolve data
+      , d.reject
+      promise d
     enrich = (obj, url) ->
       if url then obj._links = self: href: url
       obj.$bind = ->
@@ -60,6 +79,7 @@
           args.shift()
         pathOrUrl = args[1]
         pathOrUrl ?= link
+        pathOrUrl = pathOrUrl.replace /{.*}/, ""
         enrich target, makeUrl selfLink(obj), pathOrUrl
       obj.$load = (params) ->
         d = deferred()
@@ -70,14 +90,18 @@
           else
             for prop of obj
               if prop.indexOf('_') != 0 and typeof obj[prop] != 'function'
-                delete obj[prop]
+                obj[prop] = undefined
+            links = obj._links
             extend obj, data
+            obj._links = links
+            extend obj._links, data._links if data._links
             if data?._links
               for name, link of data._links
                 if name != 'self'
                   p = obj[name] = {}
                   obj.$bind p, link.href
           d.resolve obj
+        , d.reject
         promise d
       if (obj instanceof Array)
         obj.$add = (items) ->
@@ -89,10 +113,13 @@
       obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
       obj.$create = (item) ->
         d = deferred()
-        req method: 'POST', url: selfLink(obj), data: item or {}
+        req method: 'POST', url: selfLink(obj), data: (item or {})
         .then (data) ->
-          extend item, data if item
-          d.resolve item or data
+          extend(item, data) if item
+          item ?= data
+          enrich item, selfLink item
+          d.resolve item
+        , d.reject
         promise d
       obj.$delete = -> req method: 'DELETE', url: selfLink(obj)
       removeLink = selfLink obj

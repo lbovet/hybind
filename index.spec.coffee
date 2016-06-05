@@ -106,7 +106,6 @@ describe 'hybind', ->
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', url: 'http://localhost/john'
             data: JSON.stringify name: 'john'
-            headers: { 'Content-Type': 'application/json' }
           done()
 
     describe '$delete', ->
@@ -226,5 +225,4 @@ describe 'hybind', ->
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'POST', url: 'http://localhost/addresses'
             data: 'http://localhost/newyork\nhttp://localhost/newdehli'
-            headers: { 'Content-Type': 'text/uri-list' }
           done()
