@@ -30,7 +30,9 @@
           for item in v
             coll.push item
             link = selfLink item
-            enrich item, link if link
+            if link
+              link = selfLink(obj)+'/'+link.split('/')[-1..]
+              enrich item, link
           break
     req = (r, params) ->
       d = deferred()
@@ -54,7 +56,6 @@
             data = JSON.parse(data)
         catch e
           d.reject e
-        #console.log opts, data, s, r
         d.resolve data
       , d.reject
       promise d
@@ -94,12 +95,16 @@
             links = obj._links
             extend obj, data
             obj._links = links
+            self = obj._links.self
             extend obj._links, data._links if data._links
+            obj._links.self = self
             if data?._links
               for name, link of data._links
                 if name != 'self'
                   p = obj[name] = {}
                   obj.$bind p, link.href
+                else
+                  obj.$bind.self = link.href
           d.resolve obj
         , d.reject
         promise d
@@ -121,9 +126,13 @@
           d.resolve item
         , d.reject
         promise d
-      obj.$delete = -> req method: 'DELETE', url: selfLink(obj)
+      obj.$delete = ->
+        if obj.$bind.self
+          req method: 'DELETE', url: obj.$bind.self
+        else
+          obj.$load().then -> req method: 'DELETE', url: obj.$bind.self
       removeLink = selfLink obj
-      obj.$remove = -> req method: 'DELETE', url: removeLink
+      obj.$remove = -> req method: 'DELETE', url: selfLink(obj)
       obj
     root = $id: (fn) -> idFn = fn
     enrich root, url

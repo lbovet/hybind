@@ -83,11 +83,11 @@ describe 'hybind', ->
           expect(john.$load).toBeDefined()
           expect(john._links).toBeDefined()
           done()
-      it 'should replace the links if they are present', (done) ->
+      it 'should notreplace the links if they are present', (done) ->
         @http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
-          expect(john._links.self.href).toBe 'http://remotehost/john'
+          expect(john._links.self.href).toBe 'http://localhost/john'
           done()
       it 'should create properties from links', (done) ->
         @http.andReturn Q _links:
@@ -109,18 +109,12 @@ describe 'hybind', ->
           done()
 
     describe '$delete', ->
-      it 'should issue a DELETE request', (done) ->
-        http = @http
-        @john.$delete().then ->
-          expect(http).toHaveBeenCalledWith jasmine.objectContaining
-            method: 'DELETE', url: 'http://localhost/john'
-          done()
       it 'should DELETE the loaded self link', (done) ->
         http = @http
         http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
-          http.andReturn Q()
+          http.reset()
           john.$delete().then ->
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://remotehost/john'
@@ -187,8 +181,7 @@ describe 'hybind', ->
       it 'should map collections', (done) ->
         addresses = @addresses
         @http.andReturn Q
-          _links:
-            self: href: addresses._links.self
+          _links: self: href: addresses._links.self.href
           _embedded:
             addresses: [
                 city: 'London'
@@ -226,3 +219,24 @@ describe 'hybind', ->
             method: 'POST', url: 'http://localhost/addresses'
             data: 'http://localhost/newyork\nhttp://localhost/newdehli'
           done()
+
+    describe '$remove', ->
+      it 'should delete association', (done) ->
+        addresses = @addresses
+        http = @http
+        http.andReturn Q
+          _links: self: href: addresses._links.self.href
+          _embedded:
+            addresses: [
+                city: 'London'
+                _links: self: href: "http://localhost/london"
+              ,
+                city: 'Paris'
+            ]
+        addresses.$load().then ->
+          http.reset()
+          http.andReturn Q()
+          addresses[0].$remove().then ->
+            expect(http).toHaveBeenCalledWith jasmine.objectContaining
+              method: 'DELETE', url: 'http://localhost/addresses/london'
+            done()
