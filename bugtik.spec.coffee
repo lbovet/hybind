@@ -12,36 +12,49 @@ describe 'bugtik', ->
       expect(api.projects).toBeDefined()
       expect(api.severities).toBeDefined()
       done()
+    .done()
 
   it 'should create and assign severity', (done) ->
     api = @api
     api.$bind 'severities', []
-    important = color: 'yellow'
+    api.$bind 'colors', []
+    important = {}
+    yellow = code: '#EEEE11'
     api.severities.$bind(important, 'important').$save()
     .then ->
       api.severities.$load()
     .then ->
-      found = (s for s in api.severities.filter (s) -> s.color == 'yellow')
+      found = (s for s in api.severities.filter (s) -> s.name == 'important')
       expect(found.length).toBeGreaterThan 0
+      api.colors.$load()
+    .then ->
+      api.colors.$bind(yellow, 'yellow').$save()
+    .then ->
+      important.$bind('color').$set yellow
+    .then ->
       api.$bind('tickets', []).$load()
     .then ->
       api.tickets[0].$bind('severity').$load()
     .then ->
-      expect(api.tickets[0].severity.name).toBe 'critical'
+      expect(api.tickets[0].severity.name).toBe 'normal'
       api.tickets[0].severity.$set important
     .then ->
       api.tickets[0].severity.$load()
     .then ->
-      expect(api.tickets[0].severity.color).toBe 'yellow'
-      api.tickets[0].severity.$set api.severities[0]
+      api.tickets[0].severity.color.$load()
+    .then ->
+      expect(api.tickets[0].severity.color.name).toBe 'yellow'
+      api.tickets[0].severity.$set api.severities[1]
     .then ->
       api.tickets[0].severity.$load()
     .then ->
-      expect(api.tickets[0].severity.color).toBe 'red'
+      api.tickets[0].severity.color.$load()
+    .then ->
+      expect(api.tickets[0].severity.color.name).toBe 'blue'
     .then ->
       important.$delete()
-    .then ->
-      done()
+    .then done
+    .done()
 
   it 'should move tickets across projects', (done) ->
     api = @api
@@ -80,3 +93,15 @@ describe 'bugtik', ->
       expect(check projects[1].tickets).toBe true
       ticket.$delete() for ticket in projects[1].tickets
       done()
+    .done()
+
+  iit 'should find by owner', (done) ->
+    @api.$load().then (api) ->
+      api.tickets.$bind('search').$load()
+    .then (search) ->
+      search.findByOwner.$load(owner: 'me')
+    .then (results) ->
+      console.log results
+      expect(result.length).toBe 1
+      done()
+    .done()
