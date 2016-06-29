@@ -1,6 +1,6 @@
 {
   "name": "hybind",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Binds javascript objects to HAL hypermedia REST APIs",
   "main": "index.js",
   "scripts": {

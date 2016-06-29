@@ -14,7 +14,7 @@ describe 'bugtik', ->
       done()
     .done()
 
-  it 'should create and assign severity', (done) ->
+  xit 'should create and assign severity', (done) ->
     api = @api
     api.$bind 'severities', []
     api.$bind 'colors', []
@@ -95,7 +95,7 @@ describe 'bugtik', ->
       done()
     .done()
 
-  iit 'should find by owner', (done) ->
+  xit 'should find by owner', (done) ->
     @api.$load().then (api) ->
       api.tickets.$bind('search').$load()
     .then (search) ->
