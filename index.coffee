@@ -4,8 +4,14 @@
   else if typeof module == 'object' and module.exports # Node
     module.exports = factory require('lodash'), require('q').defer, require('najax')
   else if root.angular # AngularJS
-    root.angular.module('hybind', []).factory 'api', ['$q', '$http',
-     (q, http) -> factory root.angular, $q.defer, $http ]
+    root.angular.module('hybind', []).factory 'hybind', ['$q', '$http',
+      (q, http) ->
+       req = (opts) ->
+         d = q.defer()
+         http(opts).then (res) ->
+           d.resolve res.data, res
+         d.promise
+       factory root.angular, q.defer, req ]
   else
     root.hybind = factory(root.jQuery or root.$)
 ) this, (fw, deferred, http) ->
