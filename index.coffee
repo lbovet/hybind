@@ -19,7 +19,7 @@
   promise = if deferred then (d) -> d.promise else (d) -> d.promise()
   deferred ?= fw.Deferred
   http ?= fw.ajax
-  selfLink = (obj) -> obj?._links?.self?.href
+  selfLink = (obj) -> obj?.$bind?.self
   str = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
@@ -35,18 +35,18 @@
         for k,v of obj._embedded
           for item in v
             coll.push item
-            link = selfLink item
+            link = item?._links?.self?.href
             if link
-              link = selfLink(obj)+'/'+link.split('/')[-1..]
               enrich item, link
+              item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
           break
     req = (r, params) ->
       d = deferred()
       opts = {}
       extend opts, defaults
-      headers = opts.headers
       extend opts, r
-      opts.headers = headers or {}
+      opts.headers = {}
+      extend(opts.headers, defaults.headers) if defaults.headers
       extend(opts.headers, r.headers) if r.headers
       if typeof opts.data == 'string'
         extend opts.headers, { 'Content-Type': 'text/uri-list' }
@@ -66,7 +66,6 @@
       , d.reject
       promise d
     enrich = (obj, url) ->
-      if url then obj._links = self: href: url
       obj.$bind = ->
         args = Array.prototype.slice.call arguments
         arg = args[0]
@@ -88,22 +87,19 @@
         pathOrUrl ?= link
         pathOrUrl = pathOrUrl.replace /{.*}/, ""
         enrich target, makeUrl selfLink(obj), pathOrUrl
+      if url then obj.$bind.ref = obj.$bind.self = url
       obj.$load = (params) ->
         d = deferred()
-        req {method: 'GET', url: selfLink obj}, params
+        req {method: 'GET', url: obj.$bind.ref}, params
         .then (data) ->
           if (obj instanceof Array)
             collMapper data, obj
           else
             for prop of obj
-              if prop.indexOf('_') != 0 and typeof obj[prop] != 'function'
+              if typeof obj[prop] != 'function'
                 obj[prop] = undefined
-            links = obj._links
             extend obj, data
-            obj._links = links
-            self = obj._links.self
-            extend obj._links, data._links if data._links
-            obj._links.self = self
+            obj._links = undefined
             if data?._links
               for name, link of data._links
                 if name != 'self'
@@ -120,7 +116,7 @@
           data = (selfLink item for item in items)
           req method: 'POST', url: selfLink(obj), data: data.join '\n'
       else
-        obj.$set = (item) -> req method: 'PUT', url: selfLink(obj), data: selfLink item
+        obj.$set = (item) -> req method: 'PUT', url: obj.$bind.ref, data: selfLink item
       obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
       obj.$create = (item) ->
         d = deferred()
@@ -128,7 +124,7 @@
         .then (data) ->
           extend(item, data) if item
           item ?= data
-          enrich item, selfLink item
+          enrich item, data._links.self.href
           d.resolve item
         , d.reject
         promise d
@@ -138,7 +134,7 @@
         else
           obj.$load().then -> req method: 'DELETE', url: obj.$bind.self
       removeLink = selfLink obj
-      obj.$remove = -> req method: 'DELETE', url: selfLink(obj)
+      obj.$remove = -> req method: 'DELETE', url: obj.$bind.ref
       obj
     root = $id: (fn) -> idFn = fn
     enrich root, url

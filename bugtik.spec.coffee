@@ -14,7 +14,7 @@ describe 'bugtik', ->
       done()
     .done()
 
-  xit 'should create and assign severity', (done) ->
+  it 'should create and assign severity', (done) ->
     api = @api
     api.$bind 'severities', []
     api.$bind 'colors', []
@@ -51,10 +51,9 @@ describe 'bugtik', ->
       api.tickets[0].severity.color.$load()
     .then ->
       expect(api.tickets[0].severity.color.name).toBe 'blue'
-    .then ->
       important.$delete()
-    .then done
-    .done()
+    .then ->
+      done()
 
   it 'should move tickets across projects', (done) ->
     api = @api
@@ -102,6 +101,6 @@ describe 'bugtik', ->
       search.findByOwner.$load(owner: 'me')
     .then (results) ->
       console.log results
-      expect(result.length).toBe 1
+      expect(results.length).toBe 1
       done()
     .done()
