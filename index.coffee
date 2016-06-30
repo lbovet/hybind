@@ -20,7 +20,8 @@
   deferred ?= fw.Deferred
   http ?= fw.ajax
   selfLink = (obj) -> obj?.$bind?.self
-  str = (obj) -> JSON.stringify obj, (k,v) -> v if k != '_links'
+  str = (obj) -> JSON.stringify obj, (k,v) ->
+    v if k is "" or not v?.$bind
   makeUrl = (baseUrl, pathOrUrl) ->
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
@@ -82,7 +83,7 @@
           args.shift()
         else
           prop = arg
-          target = obj[prop] = {}
+          target = obj[prop] or obj[prop] = {}
         link = args[0]
         link = link target if typeof link is 'function'
         link = idFn target if link is undefined
@@ -94,10 +95,17 @@
         pathOrUrl = args[1]
         pathOrUrl ?= link
         pathOrUrl = pathOrUrl.replace /{.*}/, ""
-        enrich target, makeUrl selfLink(obj), pathOrUrl
+        if not target.$bind
+          enrich target, makeUrl selfLink(obj), pathOrUrl
+        else
+          target.$bind.ref = makeUrl selfLink(obj), pathOrUrl
+          console.log(target.$bind.self)
+          target
+      #console.log obj.$bind.ref, obj.$bind.ref, url
       if url
         obj.$bind.ref = url
         obj.$bind.self ?= url
+      #console.log obj.$bind.ref, obj.$bind.ref, url
       obj.$load = (params) ->
         d = deferred()
         req {method: 'GET', url: obj.$bind.ref}, params
@@ -126,7 +134,9 @@
           data = (selfLink item for item in items)
           req method: 'POST', url: selfLink(obj), data: data.join '\n'
       else
-        obj.$set = (item) -> req method: 'PUT', url: obj.$bind.ref, data: selfLink item
+        obj.$set = (item) ->
+          item ?= obj
+          req method: 'PUT', url: obj.$bind.ref, data: selfLink item
       obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
       obj.$create = (item) ->
         d = deferred()

@@ -22,6 +22,12 @@ describe 'hybind', ->
       it 'should have a matching self link', ->
         obj = @api.$bind 'hello'
         expect(obj.$bind.self).toBe 'http://localhost/hello'
+      it 'should keep existing property object', ->
+        obj1 = @api.$bind 'hello'
+        @api.hello.$bind.self="http://remotehost/hello"
+        obj2 = @api.$bind 'hello'
+        expect(obj1).toBe obj2
+        expect(obj2.$bind.ref).toBe 'http://localhost/hello'
       it 'should have an overridable url', ->
         obj = @api.$bind 'hello', 'http://remotehost'
         expect(obj.$bind.self).toBe 'http://remotehost'
