@@ -4,8 +4,8 @@
   "description": "Binds javascript objects to HAL hypermedia REST APIs",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/jasmine-node/bin/jasmine-node --coffee index.spec.coffee",
-    "prepublish": "node_modules/coffee-script/bin/coffee -c index.coffee"
+    "test": "./node_modules/jasmine-node/bin/jasmine-node --coffee index.spec.coffee",
+    "prepublish": "./node_modules/coffee-script/bin/coffee -c index.coffee"
   },
   "repository": {
     "type": "git",

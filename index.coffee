@@ -99,13 +99,10 @@
           enrich target, makeUrl selfLink(obj), pathOrUrl
         else
           target.$bind.ref = makeUrl selfLink(obj), pathOrUrl
-          console.log(target.$bind.self)
           target
-      #console.log obj.$bind.ref, obj.$bind.ref, url
       if url
         obj.$bind.ref = url
         obj.$bind.self ?= url
-      #console.log obj.$bind.ref, obj.$bind.ref, url
       obj.$load = (params) ->
         d = deferred()
         req {method: 'GET', url: obj.$bind.ref}, params
