@@ -39,6 +39,14 @@
             if link
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
+            if item?._links
+              for name, link of item._links
+                if name != 'self'
+                  p = item[name] = {}
+                  item.$bind p, link.href
+                else
+                  item.$bind.self = link.href
+            item._links = undefined
           break
     req = (r, params) ->
       d = deferred()
@@ -87,7 +95,9 @@
         pathOrUrl ?= link
         pathOrUrl = pathOrUrl.replace /{.*}/, ""
         enrich target, makeUrl selfLink(obj), pathOrUrl
-      if url then obj.$bind.ref = obj.$bind.self = url
+      if url
+        obj.$bind.ref = url
+        obj.$bind.self ?= url
       obj.$load = (params) ->
         d = deferred()
         req {method: 'GET', url: obj.$bind.ref}, params

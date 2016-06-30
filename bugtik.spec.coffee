@@ -94,13 +94,14 @@ describe 'bugtik', ->
       done()
     .done()
 
-  xit 'should find by owner', (done) ->
+  it 'should find by owner', (done) ->
     @api.$load().then (api) ->
-      api.tickets.$bind('search').$load()
-    .then (search) ->
-      search.findByOwner.$load(owner: 'me')
+      api.tickets.$bind('search/findByOwner', []).$load(owner: 'me')
     .then (results) ->
-      console.log results
       expect(results.length).toBe 1
+      expect(results[0].owner).toBe 'me'
+      results[0].severity.$load()
+    .then (severity) ->
+      expect(severity.name).toBe 'normal'
       done()
     .done()
