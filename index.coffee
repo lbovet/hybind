@@ -43,7 +43,7 @@
             if item?._links
               for name, link of item._links
                 if name != 'self'
-                  p = item[name] = {}
+                  p = item[name] or item[name] = {}
                   item.$bind p, link.href
                 else
                   item.$bind.self = link.href
@@ -118,7 +118,7 @@
             if data?._links
               for name, link of data._links
                 if name != 'self'
-                  p = obj[name] = {}
+                  p = obj[name] or obj[name] = {}
                   obj.$bind p, link.href
                 else
                   obj.$bind.self = link.href
