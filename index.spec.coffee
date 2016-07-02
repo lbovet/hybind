@@ -188,6 +188,26 @@ describe 'hybind', ->
             data: 'http://localhost/paul'
           done()
 
+    describe '$share', ->
+      it 'should cache objects', ->
+        cache = {}
+        cb = jasmine.createSpy('cb');
+        @john.$share cache, cb
+        expect(cb).toHaveBeenCalledWith @john
+        cb.reset()
+        @api.$bind 'john2', { name: 'john2'}, "http://localhost/john"
+        shared = @api.$share cache, 'john2'
+        expect(shared).toBeDefined()
+        expect(@api.john2).toBe @john
+
+    describe '$share', ->
+      it 'without property should not replace objects', ->
+        cache = {}
+        @john.$share cache
+        @api.$bind 'john2', { name: 'john2'}, "http://localhost/john"
+        @api.$share cache, 'john2'
+        expect(@api.john2).toBe @john
+
   describe 'operations on collections', ->
     beforeEach ->
       @addresses = []

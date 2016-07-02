@@ -30,13 +30,13 @@
     defaults.headers ?= {}
     extend defaults.headers, Accept: 'application/json'
     idFn = -> throw 'No id function defined'
-    collMapper = (obj, coll) ->
+    collMapper = (obj, coll, opts) ->
       coll.length = 0
       if obj._embedded
         for k,v of obj._embedded
           for item in v
-            coll.push item
             link = item?._links?.self?.href
+            coll.push item
             if link
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
@@ -103,12 +103,12 @@
       if url
         obj.$bind.ref = url
         obj.$bind.self ?= url
-      obj.$load = (params) ->
+      obj.$load = (params, opts) ->
         d = deferred()
         req {method: 'GET', url: obj.$bind.ref}, params
         .then (data) ->
           if (obj instanceof Array)
-            collMapper data, obj
+            collMapper data, obj, opts
           else
             for prop of obj
               if typeof obj[prop] != 'function'
@@ -152,6 +152,18 @@
           obj.$load().then -> req method: 'DELETE', url: obj.$bind.self
       removeLink = selfLink obj
       obj.$remove = -> req method: 'DELETE', url: obj.$bind.ref
+      obj.$share = (cache, prop, cb) ->
+        if not cb and typeof prop == 'function'
+          cb = prop
+          prop = undefined
+        item = if prop then obj[prop] else obj
+        link = selfLink item
+        cache ?= defaults?.cache
+        cached = cache[link]
+        if prop and cached then obj[prop] = cached
+        cache[link] = item if not cached
+        if cb and not cached then cb item
+        item
       obj
     root = $id: (fn) -> idFn = fn
     enrich root, url
