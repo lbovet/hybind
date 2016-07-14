@@ -20,6 +20,7 @@
   deferred ?= fw.Deferred
   http ?= fw.ajax
   selfLink = (obj) -> obj?.$bind?.self
+  clean = (url) -> url.replace /{.*}/g, ''
   str = (obj) -> JSON.stringify obj, (k,v) ->
     v if k is "" or not v?.$bind
   makeUrl = (baseUrl, pathOrUrl) ->
@@ -30,6 +31,16 @@
     defaults.headers ?= {}
     extend defaults.headers, Accept: 'application/json'
     idFn = -> throw 'No id function defined'
+    bind = (item)->
+      if item?._links
+        for name, link of item._links
+          if name != 'self'
+            p = item[name] or item[name] = {}
+            item.$bind p, link.href
+            bind item[name]
+          else
+            item.$bind.self = clean link.href
+        item._links = undefined
     collMapper = (obj, coll, opts) ->
       coll.length = 0
       if obj._embedded
@@ -40,14 +51,7 @@
             if link
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
-            if item?._links
-              for name, link of item._links
-                if name != 'self'
-                  p = item[name] or item[name] = {}
-                  item.$bind p, link.href
-                else
-                  item.$bind.self = link.href
-            item._links = undefined
+            bind item
           break
     req = (r, params) ->
       d = deferred()
@@ -94,15 +98,15 @@
           args.shift()
         pathOrUrl = args[1]
         pathOrUrl ?= link
-        pathOrUrl = pathOrUrl.replace /{.*}/, ""
+        pathOrUrl = clean pathOrUrl
         if not target.$bind
           enrich target, makeUrl selfLink(obj), pathOrUrl
         else
-          target.$bind.ref = makeUrl selfLink(obj), pathOrUrl
+          target.$bind.ref = clean makeUrl selfLink(obj), pathOrUrl
           target
       if url
-        obj.$bind.ref = url
-        obj.$bind.self ?= url
+        obj.$bind.ref = clean url
+        obj.$bind.self ?= obj.$bind.ref
       obj.$load = (params, opts) ->
         d = deferred()
         req {method: 'GET', url: obj.$bind.ref}, params
@@ -114,14 +118,7 @@
               if typeof obj[prop] != 'function'
                 obj[prop] = undefined
             extend obj, data
-            obj._links = undefined
-            if data?._links
-              for name, link of data._links
-                if name != 'self'
-                  p = obj[name] or obj[name] = {}
-                  obj.$bind p, link.href
-                else
-                  obj.$bind.self = link.href
+            bind obj
           d.resolve obj
         , d.reject
         promise d
