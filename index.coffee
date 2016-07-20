@@ -34,13 +34,15 @@
     bind = (item)->
       if item?._links
         for name, link of item._links
+          self = null
           if name != 'self'
-            p = item[name] or item[name] = {}
-            item.$bind p, link.href
-            bind item[name]
+            if item.$bind?.self != clean link.href
+              p = item[name] or item[name] = {}
+              item.$bind p, link.href
+              bind item[name]
           else
             item.$bind.self = clean link.href
-        item._links = undefined
+        delete item._links
     collMapper = (obj, coll, opts) ->
       coll.length = 0
       if obj._embedded
