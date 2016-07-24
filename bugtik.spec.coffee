@@ -75,7 +75,10 @@ describe 'bugtik', ->
     .then ->
       api.tickets.$create summary: '3'
     .then (ticket) ->
+      id = ticket.$bind.self.split('/')[-1..]
       tickets.push ticket
+      projects[0].tickets.$bind ticket
+      expect(ticket.$bind.ref).toBe 'http://localhost:8080/api/projects/1/tickets/'+id
       projects[0].tickets.$add ticket
     .then ->
       projects[0].tickets.$load()

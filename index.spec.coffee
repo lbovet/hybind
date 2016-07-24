@@ -48,7 +48,7 @@ describe 'hybind', ->
         expect(@john.$bind.self).toBe 'http://remotehost'
       it 'should fail if id function is missing', ->
         api = @api
-        expect(-> api.$bind @john).toThrow 'No id function defined'
+        expect(-> api.$bind @john).toThrow 'No property or id specified'
 
     describe 'collections', ->
       it 'should be supported as parameter', ->

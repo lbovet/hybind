@@ -20,17 +20,18 @@
   deferred ?= fw.Deferred
   http ?= fw.ajax
   selfLink = (obj) -> obj?.$bind?.self
-  clean = (url) -> url.replace /{.*}/g, ''
+  clean = (url) -> url.replace /{.*}/g, '' if url
   str = (obj) -> JSON.stringify obj, (k,v) ->
     v if k is "" or not v?.$bind
   makeUrl = (baseUrl, pathOrUrl) ->
+    if not pathOrUrl then return
     baseUrl += '/' if baseUrl[-1..] != '/'
     if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
   hybind = (url, defaults) ->
     defaults ?= {}
     defaults.headers ?= {}
     extend defaults.headers, Accept: 'application/json'
-    idFn = -> throw 'No id function defined'
+    idFn = -> null
     bind = (item)->
       if item?._links
         for name, link of item._links
@@ -102,9 +103,13 @@
         pathOrUrl ?= link
         pathOrUrl = clean pathOrUrl
         if not target.$bind
+          if not pathOrUrl then throw 'No property or id specified'
           enrich target, makeUrl selfLink(obj), pathOrUrl
         else
-          target.$bind.ref = clean makeUrl selfLink(obj), pathOrUrl
+          if (obj instanceof Array)
+            target.$bind.ref = obj?.$bind?.self+'/'+target.$bind.self.split('/')[-1..]
+          else
+            target.$bind.ref = clean makeUrl selfLink(obj), pathOrUrl
           target
       if url
         obj.$bind.ref = clean url
