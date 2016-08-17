@@ -146,6 +146,7 @@
           extend(item, data) if item
           item ?= data
           enrich item, data._links.self.href
+          delete item._links
           d.resolve item
         , d.reject
         promise d
