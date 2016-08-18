@@ -8,7 +8,7 @@ http = hybind.http = function(opts) {
   	req += "\n" + opts.data;
   }
 	var elt = $("<code/>").addClass("http").text(req);
-  $("#output").append($("<pre/>").append(elt));
+  $("body").append($("<pre/>").append(elt));
   hljs.highlightBlock(elt.get(0));
   return $.Deferred().resolve(responses[responseIndex++]).promise();
 }
@@ -24,7 +24,7 @@ window.console = {
       }
     });
     var elt = $("<code/>").addClass("javascript").text(name + stringify(JSON.parse(JSON.stringify(x))));
-    $("#output").append($("<pre/>").append(elt));
+    $("body").append($("<pre/>").append(elt));
     hljs.highlightBlock(elt.get(0));
 	}
 }
