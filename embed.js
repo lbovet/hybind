@@ -17,7 +17,7 @@ var originalConsole = window.console;
 window.console = {
   log: function(x) {
     originalConsole.log(x);
-    var elt = $("<code/>").addClass("javascript").text(stringify(JSON.parse(JSON.stringify(x))));
+    var elt = $("<code/>").addClass("javascript").text(stringify(x));
     $("body").append($("<pre/>").append(elt));
     hljs.highlightBlock(elt.get(0));
 	}
