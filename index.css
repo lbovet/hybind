@@ -1,0 +1,39 @@
+body {
+  color: #bbbbbb;
+  -webkit-font-smoothing: antialiased;
+}
+h2 {
+  font-size: 40px;
+  margin-top: 35px;
+  border-bottom: 2px solid #262E3D;
+}
+/* markdown code blocks */
+code, pre {
+  font-size: 14px;
+  font-family: "Inconsolata", "Monaco", "Andale Mono", "Lucida Console", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+  background: #262E3D;
+  border: 0px;
+  border-radius: 0;
+}
+.pln {
+  color: #f0f0f0;
+}
+.kwd, .atn {
+  color: #F2C452;
+}
+.pun, .tag {
+  color: #EEEEEE;
+}
+.str, .atv {
+  color: #A8D86D;
+}
+
+/* table of content */
+.toc-H2 {
+  line-height: 110%;
+  font-size: 90%;
+}
+.toc-H3 {
+  font-size: 66%;
+  line-height: 75%;
+}
