@@ -1,21 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hybind Documentation</title>
+    <title>Hybind - Documentation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body style="display:none">
 <xmp theme="cyborg" style="display:none;">
-# Hybind
+  <header class="jumbotron subhead well" id="overview">
+    <div class="row">
+      <div class="span7">
+        <h1 style="font-size: 380%">Hybind</h1>
+        <p class="lead">Binds javascript objects to HAL hypermedia REST APIs</p>
+      </div>
+      <div class="span3 offset1">
+        <div>
+          <div class="pull-left" style="padding-right: 1em;">
+            <a href="https://github.com/lbovet/hybind"><img src="github.png" style="width: 24px;"> GitHub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 
-Welcome
+## Purpose
+
+
 
 <div class="placeholder"></div>
 
 ## API
 
 </xmp>
-<div class="container sample"><script async src="https://jsfiddle.net/lbovet/qmywfpyt/23/embed/js,html,result/dark/"></script></div>
+
+<div class="container sample"><script async src="https://jsfiddle.net/lbovet/qmywfpyt/24/embed/js,html,result/dark/"></script></div>
+
 <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
 <script>
 var placeholders = document.getElementsByClassName("placeholder");
@@ -24,21 +42,6 @@ for(var i=0; i < placeholders.length; i++) {
   console.log("moving", placeholders[i], samples[i]);
   placeholders[i].appendChild(samples[i]);
 }
-</script>
-<script src="stringify.js"></script>
-<script>
-  obj = {
-    a: 2,
-    b: undefined,
-    c: function() {
-      console.log("hello")
-    },
-    d: {},
-    xwerwer: [ {a: 2}, "hello", undefined ]
-  }
-  console.log(stringify(obj))
-  console.log(stringify({}))
-  console.log(stringify([1, 2, 3, 4]))
 </script>
 </body>
 </html>
