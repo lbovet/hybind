@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2012 Remy Sharp, http://jsbin.com
- *  
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -8,10 +8,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- *  
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- *  
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -65,7 +65,7 @@ var stringify = (function () {
       return o ? 'true' : 'false';
     }
     if (type == '[object Function]') {
-      return o.toString().split('\n  ').join('\n' + buffer);
+      return "[object Function]";
     }
     if (type == '[object String]') {
       return '"' + htmlEntities(o.replace(/"/g, '\\"')) + '"';
@@ -87,7 +87,7 @@ var stringify = (function () {
     // Stringify each member of the array
     if (type == '[object Array]') {
       for (i = 0; i < o.length; i++) {
-        parts.push(stringify(o[i], visited));
+        parts.push(stringify(o[i], visited, buffer+'  '));
       }
       return '[' + parts.join(', ') + ']';
     }
@@ -101,7 +101,7 @@ var stringify = (function () {
         newBuffer = buffer + '  ';
 
     // Dive down if we're less than 2 levels deep
-    if (buffer.length / 2 < 2) {
+    if (buffer.length / 2 < 10) {
 
       var names = [];
       // Some objects don't like 'in', so just skip them
@@ -121,9 +121,9 @@ var stringify = (function () {
     }
 
     // If nothing was gathered, return empty object
-    if (!parts.length) return typeStr + '{ ... }';
+    if (!parts.length) return '{}';
 
     // Return the indented object with new lines
-    return typeStr + '{\n' + parts.join(',\n') + '\n' + buffer + '}';
+    return '{\n' + parts.join(',\n') + '\n' + buffer + '}';
   };
 }());

@@ -1,18 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>hybind documentation</title>
+    <title>Hybind Documentation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
-<body>
-<textarea theme="united" style="display:none;">
+  <body style="display:none">
+<xmp theme="cyborg" style="display:none;">
 # Hybind
 
 Welcome
 
+<div class="placeholder"></div>
+
 ## API
-  
-</textarea>
+
+</xmp>
+<div class="container sample"><script async src="https://jsfiddle.net/lbovet/qmywfpyt/23/embed/js,html,result/dark/"></script></div>
 <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+<script>
+var placeholders = document.getElementsByClassName("placeholder");
+var samples = document.getElementsByClassName("sample");
+for(var i=0; i < placeholders.length; i++) {
+  console.log("moving", placeholders[i], samples[i]);
+  placeholders[i].appendChild(samples[i]);
+}
+</script>
+<script src="stringify.js"></script>
+<script>
+  obj = {
+    a: 2,
+    b: undefined,
+    c: function() {
+      console.log("hello")
+    },
+    d: {},
+    xwerwer: [ {a: 2}, "hello", undefined ]
+  }
+  console.log(stringify(obj))
+  console.log(stringify({}))
+  console.log(stringify([1, 2, 3, 4]))
+</script>
 </body>
 </html>

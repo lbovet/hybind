@@ -5,7 +5,7 @@ http = hybind.http = function(opts) {
   	req += k+": "+v+"\n";
   });
   if(opts.data) {
-  	req += "\n" + opts.data;
+  	req += "\n" + JSON.stringify(JSON.parse(opts.data), null, 2);
   }
 	var elt = $("<code/>").addClass("http").text(req);
   $("body").append($("<pre/>").append(elt));
@@ -14,7 +14,7 @@ http = hybind.http = function(opts) {
 }
 
 var originalConsole = window.console;
-window.console = { 
+window.console = {
   log: function(x) {
     originalConsole.log(x);
     var name = "";
