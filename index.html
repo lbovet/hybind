@@ -3,10 +3,10 @@
   <head>
     <title>Hybind - Home</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
-    <link href="//fonts.googleapis.com/css?family=Audiowide" rel="stylesheet">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+    <link href="http://fonts.googleapis.com/css?family=Audiowide" rel="stylesheet">
   </head>
-<body style="display:none">
+<body style="display:none;background:black">
 <xmp theme="cyborg" style="display:none;">
   <header class="jumbotron subhead well" id="overview">
     <div class="row">
@@ -22,7 +22,7 @@
       <div class="span3 offset1">
         <div>
           <div class="pull-left" style="padding-right: 1em;">
-            <a href="https://github.com/lbovet/hybind"><img src="github.png" style="width: 24px;"> GitHub</a>
+            <a href="https://github.com/lbovet/hybind"><img src="github.png" style="width: 24px;"> Source Code</a>
           </div>
           <div class="clearfix">
             <a href="https://travis-ci.org/lbovet/hybind"><img src="https://travis-ci.org/lbovet/hybind.svg?branch=master"></a>
@@ -51,7 +51,7 @@ Unlike other client libraries dealing with [HAL REST APIs](http://stateless.co/h
 
 When using [Spring Data REST](http://projects.spring.io/spring-data-rest/) in the server, it is amazing how the amount of code to write is reduced to the minimum. However, a significant amount of repeated boilerplate is still required in the JavaScript client to manipulate the resources and map them to the client-side model.
 
-That's why this library exists. It enriches plain JavaScript objects with a convenient API so that performing REST requests is as easy as calling object methods.
+That's why this library exists. It enriches plain JavaScript objects with a convenient API so that performing REST requests is as easy as calling methods directly on the model objects.
 
 Have a look at the [BugTik](https://github.com/lbovet/bugtik) demo application written with AngularJS and Spring Data Rest.
 
@@ -63,17 +63,17 @@ Hybind can be used either with jQuery, AngularJS or Node.js.
 
 ```html
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-<script src="https://npmcdn.com/hybind@1.0.8/index.js"></script>
+<script src="https://npmcdn.com/hybind@latest/index.js"></script>
 ```
 
-- Without AMD a global `hybind` object is created. Just make sure to include jQuery before Hybind.
-- With AMD, it is a module depending on the `jquery` module.
+- Without AMD, a global `hybind` function is created. Just make sure to include jQuery before Hybind.
+- With AMD, it defines a module depending on the `jquery` module.
 
 ### <a id="angular"></a>AngularJS 1.x
 
 ```html
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-<script src="https://npmcdn.com/hybind@1.0.8/index.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+<script src="https://npmcdn.com/hybind@latest/index.js"></script>
 ```
 
 AngularJS is automatically detected and a `hybind` module containing a `hybind` service is registered. You can then inject it in your code at will:
@@ -119,6 +119,6 @@ Bound objects are enriched with the following methods:
 
 <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
 <link href="index.css" rel="stylesheet">
-<script src="index.js"></script>
+<script src="tools.js"></script>
 </body>
 </html>
