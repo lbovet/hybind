@@ -32,7 +32,9 @@ code, pre {
 .str, .atv {
   color: #A8D86D;
 }
-
+hr {
+  border-color: rgb(51, 181, 229)
+}
 /* embedded code samples */
 iframe {
   border-radius: 4px;
