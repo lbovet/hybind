@@ -11,7 +11,6 @@ h2 {
   border-bottom: 2px solid #262E3D;
 }
 
-
 /* markdown code blocks */
 code, pre {
   font-size: 14px;
@@ -33,7 +32,7 @@ code, pre {
   color: #A8D86D;
 }
 hr {
-  border-color: rgb(51, 181, 229)
+  border-color: rgb(51, 181, 229);
 }
 /* embedded code samples */
 iframe {
@@ -46,7 +45,7 @@ spec {
   font-size: 18px;
   display: block;
   padding: 4px 8px 4px 8px;
-  background: #1F2532;
+  background: #131517;
   border-radius: 4px;
   margin-bottom: 12px;
 }
