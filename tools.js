@@ -65,4 +65,15 @@
     }
   };
   xhttp.send();
+
+  // Replace hybind@latest with actual version
+  var xhttp2 = new XMLHttpRequest();
+  xhttp2.open("GET", "https://api.github.com/repos/lbovet/hybind/commits?sha=gh-pages&path=index.html", true);
+  xhttp2.onreadystatechange = function() {
+    if (xhttp2.readyState == 4 && xhttp2.status == 200) {
+      var date = JSON.parse(xhttp2.responseText)[0].commit.author.date;
+      document.getElementById('date').innerHTML = date.substring(0, 10);
+    }
+  };
+  xhttp2.send();
 })();

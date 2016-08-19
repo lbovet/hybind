@@ -16,6 +16,12 @@ h2 {
 .navbar .brand {
   color: #F2C452;
 }
+.small {
+  font-size: 75%;
+}
+table   {
+  border-radius: 4px !important;
+}
 
 /* markdown code blocks */
 code, pre {
@@ -23,10 +29,12 @@ code, pre {
   font-family: "Inconsolata", "Monaco", "Andale Mono", "Lucida Console", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
   background: #262E3D;
   border: 0px;
-
 }
 .pln {
   color: #f0f0f0;
+}
+a code .pln {
+  color: rgb(51, 181, 229);
 }
 .kwd, .atn {
   color: #F2C452;
@@ -40,6 +48,7 @@ code, pre {
 hr {
   border-color: rgb(51, 181, 229);
 }
+
 /* embedded code samples */
 iframe {
   border-radius: 4px;
@@ -53,7 +62,9 @@ spec {
   padding: 4px 8px 4px 8px;
   background: #131517;
   border-radius: 4px;
-  margin-bottom: 12px;
+  margin-left: -6px;
+  margin-top: 20px;
+  margin-bottom: 8px;
 }
 spec em {
   color: #C68FE8;

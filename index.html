@@ -53,7 +53,7 @@ When using [Spring Data REST](http://projects.spring.io/spring-data-rest/) in th
 
 That's why this library exists. It enriches plain JavaScript objects with a convenient API so that performing REST requests is as easy as calling methods directly on the model objects.
 
-Have a look at the [BugTik](https://github.com/lbovet/bugtik) demo application written with AngularJS and Spring Data Rest.
+Have a look at the [BugTik](https://github.com/lbovet/bugtik) sample application written with AngularJS and Spring Data Rest.
 
 ## Getting Started
 
@@ -101,33 +101,126 @@ Bound objects are enriched with the following methods:
 
 | Method | Description | HTTP Request |
 |--------|-------------|--------------|
-| [`$bind`](#_bind)   | Binds a property to a child resource | - |
-| [`$load`](#_load)   | Fetches the resource data and put it in the object | GET |
+| [`$bind`](#_bind)   | Binds a child resource | - |
+| [`$load`](#_load)   | Fetches the resource data and fills the object with it | GET |
 | [`$save`](#_save)   | Updates the bound resource with the object data | PUT |
 | [`$create`](#_create) | Creates a child resource | POST |
-| [`$delete`](#_delete)    | Delete the resource | DELETE |
+| [`$delete`](#_delete)    | Deletes a resource | DELETE |
 | [`$set`](#_set)    | Updates an association | POST |
 | [`$add`](#_add)    | Adds children to a collection | POST |
 | [`$remove`](#_remove) | Deletes an association | DELETE |
+| [`$id`](#_id) | Specifies a function to compute the URL sub-path of child resources from the object data (available only in the root object) | - |
 
 ### hybind
-
+This is the entry point of the library.
 <spec>**hybind**(pathOrUrl:_string_) : _Object_</spec>
 
-This is the entry point of the library. It creates an object bound to the root of the REST API.
+Creates the API root object. It is bound to the root of the REST API specified by `pathOrUrl`. In the browser, it can be a path computed relatively to the current page.
+
+<spec>**hybind**(pathOrUrl:_string_, defaults:_Object_) : _Object_</spec>
+
+Same as above but also customizes the default properties of the object passed to the underlying HTTP library when performing requests. This allows to customize headers and other transport-level configuration.
+
+See their respective documentation:
+
+| Framework | HTTP support |
+|---|---|
+| jQuery | [$.ajax](http://api.jquery.com/jquery.ajax/#jQuery-ajax-settings) |
+| AngularJS | [$http](https://docs.angularjs.org/api/ng/service/$http#usage) |
+| Node.js | [najax](https://github.com/najaxjs/najax) (same API as jQuery) |
 
 ### $bind
 
-<spec>obj.**$bind**(property:_string_) : _Object_</spec>
+Binds a child resource
 
-Creates a property on `obj` with the given name and binds it to a child resource of `obj` referenced by appending the property name to `obj`'s URL.
+<spec>obj.**$bind**(name:_string_) : _Object_</spec>
 
-The property value is a new empty object and is the return value of this method.
+Binds a property of `obj` with the given name to a child resource having its sub-path computed by appending the property name to `obj`'s URL.
 
+If the property does not exist, it is created as a new empty object. If it exists, it can be an object or an array. An array means that the resource corresponds to a collection.
+
+Returns the child object.
+
+<spec>obj.**$bind**(name:_string_, child:_Object_|_Array_) : _Object_</spec>
+
+Binds and sets an existing `child` object or array as a property of `obj`. The property name and child resource sub-path is given by `name`. Passing an array means that the resource corresponds to a collection.
+
+Returns the child object/array.
+
+<spec>obj.**$bind**(child:_Object_) : _Object_</spec>
+
+Binds and sets an existing `child` object as a property of `obj`. The property name and child resource sub-path is computed using the function registered with the [`$id`](#_id) method of the API root object.
+
+Returns the child object.
+
+<spec>obj.**$bind**(child:_Object_, idFn: _Function_) : _Object_</spec>
+
+Binds and sets an existing `child` object as a property of `obj`. The property name and child resource sub-path is computed by the `idFn` function applied to the child object (See also the [`$id`](#_id) method).
+
+Returns the child object.
+
+### $load
+
+Fetches the resource data and fills the object with it.
+
+<spec>objOrArr.**$load**() : _Promise&lt;Object>_</spec>
+
+Performs a GET request to retrieve the data of the bound resource and fill `objOrArr`.
+
+If `objOrArr` is an array, it is expected that the resource is a collection and its  representation contains the collection items in the `_embedded` property.
+
+`objectOrArray` will be emptied before being filled in case it was not an empty object or array.
+
+Returns a promise resolved to `objOrArray` after being filled. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+
+<spec>objOrArr.**$load**(parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
+
+Same as above but with
+
+* An object specifying URL parameters to pass in the query string. Can be null.
+* Options to be passed to the underlying HTTP library, this can be headers or other transport-level configuration (see the [`hybind`](#_hybind) function for framework-specific details).
+
+### $save
+
+Updates the bound resource with the object data.
+
+<spec>obj.**$save**() : _Promise_</spec>
+
+Performs a PUT request to create/update the bound resource with the content of `obj`.
+
+According to the REST API conventions, this can be used to create the resource if it does not exist. Otherwise, use [`$create`](#_create).
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+
+### $create
+
+Creates a child resource.
+
+<spec>objOrArr.**$create**([child:_Object_]) : _Promise&lt;Object>_</spec>
+
+Performs a POST request to create a collection item or child resource. This assumes that the REST API supports this way of creating objects and returns the created resource.
+
+If no `child` is given, it will default to an empty object.
+
+This does _not_ modify `objOrArr`, it only creates the resource in the server.
+
+Returns a promise resolving to the created object. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+
+### $delete
+
+Deletes a resource.
+
+<spec>obj.**$delete**() : _Promise_</spec>
+
+Performs a DELETE request to delete the resource bound to `obj`.
+
+This does _not_ modify `obj` nor its parent, it only deletes the resource in the server.
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
 
 </xmp>
 <hr/>
-
+<div class="container"><div class="pull-right small"><a href="https://github.com/lbovet">Laurent Bovet</a> &nbsp; <span id="date"></span></div></div>
 <div class="sample"><script async src="https://jsfiddle.net/lbovet/5eoaem4j/embed/js,html,result/dark/"></script></div>
 
 <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
