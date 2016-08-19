@@ -66,7 +66,7 @@
   };
   xhttp.send();
 
-  // Replace hybind@latest with actual version
+  // Get the the doc modification date
   var xhttp2 = new XMLHttpRequest();
   xhttp2.open("GET", "https://api.github.com/repos/lbovet/hybind/commits?sha=gh-pages&path=index.html", true);
   xhttp2.onreadystatechange = function() {
