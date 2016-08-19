@@ -45,7 +45,7 @@
       p.className = 'toc-'+toBeTOCced[i].nodeName;
       p.appendChild(tmp);
     	z.appendChild(p);
-    	var headerId = toBeTOCced[i].id || 'link' + i;
+    	var headerId = toBeTOCced[i].id || tmp.innerHTML.replace(/[^A-Za-z0-9]/g,"_");
     	tmp.href = '#' + headerId;
     	toBeTOCced[i].id = headerId;
     }

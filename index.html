@@ -6,7 +6,7 @@
     <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
     <link href="http://fonts.googleapis.com/css?family=Audiowide" rel="stylesheet">
   </head>
-<body style="display:none;background:black">
+<body style="display:none;background:#111111">
 <xmp theme="cyborg" style="display:none;">
   <header class="jumbotron subhead well" id="overview">
     <div class="row">
@@ -101,16 +101,33 @@ Bound objects are enriched with the following methods:
 
 | Method | Description | HTTP Request |
 |--------|-------------|--------------|
-| [`$bind`](#)   | Binds a property to a child resource | - |
-| `$load`   | Fetches the resource data and put it in the object | GET |
-| `$save`   | Updates the bound resource with the object data | PUT |
-| `$create` | Creates a child resource | POST |
-| `$set`    | Updates an association | POST |
-| `$add`    | Adds children to a collection | POST |
+| [`$bind`](#_bind)   | Binds a property to a child resource | - |
+| [`$load`](#_load)   | Fetches the resource data and put it in the object | GET |
+| [`$save`](#_save)   | Updates the bound resource with the object data | PUT |
+| [`$create`](#_create) | Creates a child resource | POST |
+| [`$delete`](#_delete)    | Delete the resource | DELETE |
+| [`$set`](#_set)    | Updates an association | POST |
+| [`$add`](#_add)    | Adds children to a collection | POST |
+| [`$remove`](#_remove) | Deletes an association | DELETE |
 
-### API Root
+### hybind
+
+<spec>**hybind**(pathOrUrl:_string_) : _Object_</spec>
+
+This is the entry point of the library. It creates an object bound to the root of the REST API.
+
+### $bind
+
+<spec>obj.**$bind**(property:_string_) : _Object_</spec>
+
+Creates a property on `obj` with the given name and binds it to a child resource of `obj` referenced by appending the property name to `obj`'s URL.
+
+The property value is a new empty object and is the return value of this method.
 
 
+
+
+<hr/>
 
 
 </xmp>
