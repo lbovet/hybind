@@ -1,9 +1,11 @@
 .http {
   background: #131517;
   margin-left: 24px;
+  border-radius: 4px;
 }
 
 .javascript {
   background: #1F2532;
   margin-right: 24px;
+  border-radius: 4px;
 }
