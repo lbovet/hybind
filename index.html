@@ -47,17 +47,17 @@
   </div>
 ## Overview
 
-Unlike other client libraries dealing with [HAL REST APIs](http://stateless.co/hal_specification.html), Hybind provides a high-level approach similar to what Object Relational Mapping (ORM) frameworks are for databases.
+Unlike most [client libraries](https://github.com/mikekelly/hal_specification/wiki/Libraries#javascript) dealing with [HAL REST APIs](http://stateless.co/hal_specification.html), Hybind provides a high-level approach similar to what Object Relational Mapping (ORM) frameworks are for databases.
 
-When using [Spring Data REST](http://projects.spring.io/spring-data-rest/) in the server, it is amazing how the amount of code to write is reduced to the minimum. However, a significant amount of repeated boilerplate is still required in the JavaScript client to manipulate the resources and map them to the client-side model.
+When using [Spring Data REST](http://projects.spring.io/spring-data-rest/) in the server, it is amazing how the amount of code to write is reduced to a minimum. However, a significant amount of repeated boilerplate is still required in the JavaScript client to manipulate the resources and map them to the client-side model.
 
-That's why this library exists. It enriches plain JavaScript objects with a convenient API so that performing REST requests is as easy as calling methods directly on the model objects.
+That's why this library exists. It enriches plain JavaScript objects with a convenient API so that performing REST requests is as easy as calling methods directly on the model objects. It is optimized for Spring Data REST, but should work with other HAL APIs following similar conventions.
 
 Have a look at the [BugTik](https://github.com/lbovet/bugtik) sample application written with AngularJS and Spring Data Rest.
 
 ## Getting Started
 
-Hybind can be used either with jQuery, AngularJS or Node.js.
+Hybind requires either jQuery, AngularJS or Node.js.
 
 ### <a id="jquery"></a>jQuery
 
@@ -66,7 +66,7 @@ Hybind can be used either with jQuery, AngularJS or Node.js.
 <script src="https://npmcdn.com/hybind@latest/index.js"></script>
 ```
 
-- Without AMD, a global `hybind` function is created. Just make sure to include jQuery before Hybind.
+- Without AMD, a global [`hybind`](#hybind) function is created. Just make sure to include jQuery before Hybind.
 - With AMD, it defines a module depending on the `jquery` module.
 
 ### <a id="angular"></a>AngularJS 1.x
@@ -76,7 +76,7 @@ Hybind can be used either with jQuery, AngularJS or Node.js.
 <script src="https://npmcdn.com/hybind@latest/index.js"></script>
 ```
 
-AngularJS is automatically detected and a `hybind` module containing a `hybind` service is registered. You can then inject it in your code at will:
+AngularJS is automatically detected and a `hybind` module containing a [`hybind`](#hybind) service is registered. You can then inject it in your code at will:
 
 ```javascript
 angular
@@ -88,12 +88,24 @@ angular
 
 ### <a id="node"></a>Node.js
 
+The `hybind` npm module provides the [`hybind`](#hybind) function.
+
 ```
 $ npm install hybind --save
 ```
 ```javascript
 hybind = require("hybind");
 ```
+
+### Framework Details
+
+Hybind will use a different implementation for HTTP requests and promises according to the framework.
+
+| Framework | HTTP  | Promises |
+|---|---|
+| jQuery | [$.ajax](http://api.jquery.com/jquery.ajax/) | [$.Deferred](https://api.jquery.com/category/deferred-object/) |
+| AngularJS | [$http](https://docs.angularjs.org/api/ng/service/$http#usage) | [$q](https://docs.angularjs.org/api/ng/service/$q) |
+| Node.js | [najax](https://www.npmjs.com/package/najax)| [q](https://www.npmjs.com/package/q) |
 
 ## Reference
 
@@ -102,12 +114,12 @@ Bound objects are enriched with the following methods:
 | Method | Description | HTTP Request |
 |--------|-------------|--------------|
 | [`$bind`](#_bind)   | Binds a child resource | - |
-| [`$load`](#_load)   | Fetches the resource data and fills the object with it | GET |
+| [`$load`](#_load)   | Fetches the resource data ands updates the bound object | GET |
 | [`$save`](#_save)   | Updates the bound resource with the object data | PUT |
 | [`$create`](#_create) | Creates a child resource | POST |
 | [`$delete`](#_delete)    | Deletes a resource | DELETE |
-| [`$set`](#_set)    | Updates an association | POST |
-| [`$add`](#_add)    | Adds children to a collection | POST |
+| [`$set`](#_set)    | Updates a resource association | POST |
+| [`$add`](#_add)    | Adds children to a resource collection | POST |
 | [`$remove`](#_remove) | Deletes an association | DELETE |
 | [`$id`](#_id) | Specifies a function to compute the URL sub-path of child resources from the object data (available only in the root object) | - |
 
@@ -115,19 +127,15 @@ Bound objects are enriched with the following methods:
 This is the entry point of the library.
 <spec>**hybind**(pathOrUrl:_string_) : _Object_</spec>
 
-Creates the API root object. It is bound to the root of the REST API specified by `pathOrUrl`. In the browser, it can be a path computed relatively to the current page.
+Creates the API root object and binds it to the root of the REST API specified by `pathOrUrl`. In the browser, it can be a path computed relatively to the current page.
+
+Returns the newly created API root object.
 
 <spec>**hybind**(pathOrUrl:_string_, defaults:_Object_) : _Object_</spec>
 
-Same as above but also customizes the default properties of the object passed to the underlying HTTP library when performing requests. This allows to customize headers and other transport-level configuration.
+Same as above but also customizes the default properties of the object passed to the underlying HTTP library when performing requests. This allows to customize headers and other transport-level configuration globally for all resources of this API.
 
-See their respective documentation:
-
-| Framework | HTTP support |
-|---|---|
-| jQuery | [$.ajax](http://api.jquery.com/jquery.ajax/#jQuery-ajax-settings) |
-| AngularJS | [$http](https://docs.angularjs.org/api/ng/service/$http#usage) |
-| Node.js | [najax](https://github.com/najaxjs/najax) (same API as jQuery) |
+See their respective documentation under [Framework Details](#Framework_Details).
 
 ### $bind
 
@@ -171,14 +179,14 @@ If `objOrArr` is an array, it is expected that the resource is a collection and 
 
 `objectOrArray` will be emptied before being filled in case it was not an empty object or array.
 
-Returns a promise resolved to `objOrArray` after being filled. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+Returns a promise resolved to `objOrArray` after being filled. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>objOrArr.**$load**(parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
 
 Same as above but with
 
 * An object specifying URL parameters to pass in the query string. Can be null.
-* Options to be passed to the underlying HTTP library, this can be headers or other transport-level configuration (see the [`hybind`](#_hybind) function for framework-specific details).
+* Options object to be passed to the underlying HTTP implementation, it can contains headers or other transport-level (see [Framework Details](#Framework_Details)). It extends/overrides the `defaults` object that can set by the [`hybind`](#_hybind) function.
 
 ### $save
 
@@ -190,7 +198,7 @@ Performs a PUT request to create/update the bound resource with the content of `
 
 According to the REST API conventions, this can be used to create the resource if it does not exist. Otherwise, use [`$create`](#_create).
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 ### $create
 
@@ -198,13 +206,13 @@ Creates a child resource.
 
 <spec>objOrArr.**$create**([child:_Object_]) : _Promise&lt;Object>_</spec>
 
-Performs a POST request to create a collection item or child resource. This assumes that the REST API supports this way of creating objects and returns the created resource.
+Performs a POST request to create a collection item or child resource. This assumes that the REST API supports this way of creating objects and returns the created resource in the response.
 
 If no `child` is given, it will default to an empty object.
 
 This does _not_ modify `objOrArr`, it only creates the resource in the server.
 
-Returns a promise resolving to the created object. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+Returns a promise resolving to the created object. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 ### $delete
 
@@ -216,7 +224,7 @@ Performs a DELETE request to delete the resource bound to `obj`.
 
 This does _not_ modify `obj` nor its parent, it only deletes the resource in the server.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP library.
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 </xmp>
 <hr/>
