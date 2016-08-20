@@ -2,6 +2,8 @@
 
 [![build](https://travis-ci.org/lbovet/hybind.svg?branch=master)](https://travis-ci.org/lbovet/hybind?branch=master)
 
-Binds javascript objects with HAL hypermedia REST API
+Binds JavaScript objects with HAL hypermedia REST API.
+
+Homepage: http://lbovet.github.io/hybind/
 
 See it in action in sample project: [BugTik](https://github.com/lbovet/bugtik)
