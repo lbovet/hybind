@@ -1,6 +1,6 @@
 responseIndex = 0;
 hybind.http = function(opts) {
-  var url = opts.url.indexOf("http") == 0 ? opt.url : "http://localhost:8080/" + opts.url;
+  var url = opts.url.indexOf("http") == 0 ? opts.url : "http://localhost:8080/" + opts.url;
   var req = opts.method + " " + url + " HTTP/1.1\n"
   $.each(opts.headers, function (k, v) {
     req += k+": "+v+"\n";
