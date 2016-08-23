@@ -1,3 +1,8 @@
+code, pre {
+  font-size: 14px;
+  font-family: "Inconsolata", "Monaco", "Andale Mono", "Lucida Console", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+}
+
 .http {
   background: #1F2532;
   margin-left: 24px;
