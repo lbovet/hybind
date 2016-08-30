@@ -14,9 +14,9 @@
         <h1 style="font-size: 380%;font-family: Audiowide;border: 0">Hybind</h1>
         <p class="lead">Binds JavaScript objects to HAL hypermedia REST APIs</p>
         <div class="row">
-          <div class="span2"><a href="#jquery">jQuery</a></div>
-          <div class="span2"><a href="#angular">AngularJS</a></div>
-          <div class="span2"><a href="#node">Node.js</a></div>
+          <div class="span2"><a href="#jQuery">jQuery</a></div>
+          <div class="span2"><a href="#AngularJS_1_x">AngularJS</a></div>
+          <div class="span2"><a href="#Node_js">Node.js</a></div>
         </div>
       </div>
       <div class="span3 offset1">
@@ -59,7 +59,7 @@ Have a look at the [BugTik](https://github.com/lbovet/bugtik) sample application
 
 Hybind requires either jQuery, AngularJS or Node.js.
 
-### <a id="jquery"></a>jQuery
+### jQuery
 
 ```html
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
@@ -69,7 +69,7 @@ Hybind requires either jQuery, AngularJS or Node.js.
 - Without AMD, a global [`hybind`](#hybind) function is created. Just make sure to include jQuery before Hybind.
 - With AMD, it defines a module depending on the `jquery` module.
 
-### <a id="angular"></a>AngularJS 1.x
+### AngularJS 1.x
 
 ```html
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
@@ -86,7 +86,7 @@ angular
   }]);
 ```
 
-### <a id="node"></a>Node.js
+### Node.js
 
 The `hybind` npm module provides the [`hybind`](#hybind) function.
 
@@ -99,7 +99,7 @@ hybind = require("hybind");
 
 ### Framework Details
 
-Hybind will use a different implementation for HTTP requests and promises according to the framework.
+Hybind will use a different implementation for HTTP requests and promises according to the framework you chose.
 
 | Framework | HTTP  | Promises |
 |---|---|
@@ -118,9 +118,10 @@ Bound objects are enriched with the following methods:
 | [`$save`](#_save)   | Updates the bound resource with the object data | PUT |
 | [`$create`](#_create) | Creates a child resource | POST |
 | [`$delete`](#_delete)    | Deletes a resource | DELETE |
-| [`$set`](#_set)    | Updates a resource association | POST |
+| [`$set`](#_set)    | Creates or updates a resource association | POST |
 | [`$add`](#_add)    | Adds children to a resource collection | POST |
 | [`$remove`](#_remove) | Deletes an association | DELETE |
+| [`$share`](#_share) | Keeps object in a cache to avoid loading them multiple times | - |
 | [`$id`](#_id) | Specifies a function to compute the URL sub-path of child resources from the object data (available only in the root object) | - |
 
 ### hybind
@@ -220,11 +221,77 @@ Deletes a resource.
 
 <spec>obj.**$delete**() : _Promise_</spec>
 
-Performs a DELETE request to delete the resource bound to `obj`.
+Performs a DELETE request on the resource bound to `obj`.
 
 This does _not_ modify `obj` nor its parent, it only deletes the resource in the server.
 
 Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+
+### $set
+
+Creates or update a resource association assuming that the REST API supports the same way as Spring Data Rest [does](http://docs.spring.io/spring-data/rest/docs/current/reference/html/#repository-resources.association-resource).
+
+<spec>child.**$set**() : _Promise_</spec>
+
+Updates the association of the parent object to `child`. Without argument, it makes sense only after rebinding an already bound `child` to a new parent using [`$bind`](#_bind). This performs a PUT to the association URL with `child` URL as body.
+
+This does _not_ modify `child` nor its parent, it only updates the server state.
+
+Note that if `child` has not been loaded with `$load` beforehand, the operation _may_ fail. Indeed, REST API implementations may require that clients use the _self link_ instead of arbitrary links to the resource. This is the case for Spring Data Rest. `$load` obtains this self link.
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+
+<spec>child.**$set**(newChild:_Object_) : _Promise_</spec>
+
+Updates the association of the parent object to `child` by replacing it with an association to `newChild`. This performs a PUT to the association URL with `newChild` URL as body.
+
+This does _not_ modify `child` nor its parent, it only updates the server state.
+
+Note that if `newChild` has not been loaded with `$load` beforehand, the operation _may_ fail. Indeed, REST API implementations may require that clients use the _self link_ instead of arbitrary links to the resource. This is the case for Spring Data Rest. `$load` obtains this self link.
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+
+### $add
+
+Adds children to a resource collection assuming that the REST API supports it the same way as Spring Data Rest [does](http://docs.spring.io/spring-data/rest/docs/current/reference/html/#repository-resources.association-resource).
+
+<spec>arr.**$add**(item:_Object_) : _Promise_</spec>
+
+Performs a POST request with `item` URL in the body to add it to the collection bound to `arr`.
+
+This does _not_ modify `arr` nor `item`, it only updates the server state.
+
+Note that if `item` has not been loaded with `$load` beforehand, the operation _may_ fail. Indeed, REST API implementations may require that clients use the _self link_ instead of arbitrary links to the resource. This is the case for Spring Data Rest. `$load` obtains this self link.
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+
+<spec>arr.**$add**(items:_Array&lt;Object>_) : _Promise_</spec>
+
+Same as above but adds multiple items at once.
+
+### $remove
+
+Delete an association, either to a child object or a collection item assuming that the REST API supports it the same way as Spring Data Rest [does](http://docs.spring.io/spring-data/rest/docs/current/reference/html/#repository-resources.association-resource).
+
+<spec>childOrItem.**$remove**() : _Promise_</spec>
+
+Removes the association between `childOrItem` and the parent or containing collection it has been bound with. This performs a DELETE request on the association URL.
+
+This does _not_ modify `childOrItem` nor its parent or containing collection, it only updates the server state.
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+
+### $id
+
+Specifies a function to compute the URL sub-path of child resources from the object data. This method exists only on the top-level API root object but it affects all objects bounds as descendant of this API root.
+
+<spec>apiRoot.**$id**(idFn:_Function_)</spec>
+
+Specifies globally for this API the id function providing the name and child resource sub-path. For APIs that consistently use the same field name as id, this can save some typing and code maintenance.
+
+`fn` takes the object to bind as argument and returns the name to use as property.
+
+This global id function can be overridden by passing a function argument to [`$bind`](#_bind).
 
 </xmp>
 <hr/>
