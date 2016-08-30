@@ -1,6 +1,7 @@
 body {
   color: #bbbbbb;
   -webkit-font-smoothing: antialiased;
+  padding-top: 0px;
 }
 h1, h2, h3 {
   color: #F2C452;
@@ -10,8 +11,15 @@ h2 {
   margin-top: 35px;
   border-bottom: 2px solid #262E3D;
 }
+
+.navbar-fixed-top {
+    margin-bottom: 20px;
+}
+.navbar-fixed-top, .navbar-fixed-bottom {
+    position: static;
+}
 .navbar-inner {
-  background: #0b0b0b;
+  background: #111111;
 }
 .navbar .brand {
   color: #F2C452;
@@ -60,7 +68,7 @@ spec {
   font-size: 18px;
   display: block;
   padding: 4px 8px 4px 8px;
-  background: #131517;
+  background: rgba(100,100,100,0.1);
   border-radius: 4px;
   margin-left: -6px;
   margin-top: 20px;
