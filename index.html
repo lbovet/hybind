@@ -121,7 +121,7 @@ Bound objects are enriched with the following methods:
 | [`$set`](#_set)    | Creates or updates a resource association | POST |
 | [`$add`](#_add)    | Adds children to a resource collection | POST |
 | [`$remove`](#_remove) | Deletes an association | DELETE |
-| [`$share`](#_share) | Keeps object in a cache to avoid loading them multiple times | - |
+| [`$share`](#_share) | Keeps objects in a shared cache to avoid loading them multiple times | - |
 
 ### hybind
 This is the entry point of the library.
@@ -283,6 +283,22 @@ Returns a promise resolved in case of success. The promise is rejected in case o
 <spec>arr.**$add**(items:_Array&lt;Object>_) : _Promise_</spec>
 
 Same as above but adds multiple items at once.
+
+### $share
+
+Keeps objects in a shared cache to avoid loading them multiple times.
+
+<spec>obj.**$share**(cache:_Object_) : _Object_</spec>
+
+Creates a property in `cache` containing `obj` if it does not yet exist. The property name is the URL of `obj` (self link).
+
+Returns the value of the property. That is, the cached object if it was already in cache or `obj` if it was not in cache.
+
+<spec>obj.**$share**(name:_string_, cache:_Object_) : _Object_</spec>
+
+Creates a property in `cache` containing the value of the child object `obj[name]` if it does not yet exist. The property name is the URL of the child object (self link).
+
+Returns the value of the property. That is, the cached object if it was already in cache or `obj[name]` if it was not in cache.
 
 </xmp>
 <hr/>
