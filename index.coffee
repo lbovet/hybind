@@ -157,10 +157,13 @@
           obj.$load().then -> req method: 'DELETE', url: obj.$bind.self
       removeLink = selfLink obj
       obj.$remove = -> req method: 'DELETE', url: obj.$bind.ref
-      obj.$share = (cache, prop, cb) ->
-        if not cb and typeof prop == 'function'
-          cb = prop
-          prop = undefined
+      obj.$share = (args...) ->
+        while args.length > 0
+          arg = args.shift()
+          switch typeof arg
+            when 'string' then prop = arg
+            when 'object' then cache = arg
+            when 'function' then cb = arg
         item = if prop then obj[prop] else obj
         link = selfLink item
         cache ?= defaults?.cache

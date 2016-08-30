@@ -34,7 +34,7 @@ describe 'hybind', ->
 
     describe 'with object', ->
       it 'should create a self link with given link', ->
-        @api.$bind @john, 'j'
+        @api.$bind 'j', @john
         expect(@john.$bind.self).toBe 'http://localhost/j'
       it 'should create a self link with default id function', ->
         @api.$id () -> 'jo'
@@ -44,7 +44,7 @@ describe 'hybind', ->
         @api.$bind @john, (x) -> x.name
         expect(@john.$bind.self).toBe 'http://localhost/john'
       it 'should have an overridable url', ->
-        @api.$bind @john, null, 'http://remotehost'
+        @api.$bind 'http://remotehost', @john
         expect(@john.$bind.self).toBe 'http://remotehost'
       it 'should fail if id function is missing', ->
         api = @api
@@ -196,16 +196,15 @@ describe 'hybind', ->
         expect(cb).toHaveBeenCalledWith @john
         cb.reset()
         @api.$bind 'john2', { name: 'john2'}, "http://localhost/john"
-        shared = @api.$share cache, 'john2'
+        shared = @api.$share 'john2', cache
         expect(shared).toBeDefined()
         expect(@api.john2).toBe @john
 
-    describe '$share', ->
       it 'without property should not replace objects', ->
         cache = {}
         @john.$share cache
         @api.$bind 'john2', { name: 'john2'}, "http://localhost/john"
-        @api.$share cache, 'john2'
+        @api.$share 'john2', cache
         expect(@api.john2).toBe @john
 
   describe 'operations on collections', ->
