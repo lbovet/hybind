@@ -122,7 +122,6 @@ Bound objects are enriched with the following methods:
 | [`$add`](#_add)    | Adds children to a resource collection | POST |
 | [`$remove`](#_remove) | Deletes an association | DELETE |
 | [`$share`](#_share) | Keeps object in a cache to avoid loading them multiple times | - |
-| [`$id`](#_id) | Specifies a function to compute the URL sub-path of child resources from the object data (available only in the root object) | - |
 
 ### hybind
 This is the entry point of the library.
@@ -281,17 +280,9 @@ This does _not_ modify `childOrItem` nor its parent or containing collection, it
 
 Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
-### $id
+<spec>arr.**$add**(items:_Array&lt;Object>_) : _Promise_</spec>
 
-Specifies a function to compute the URL sub-path of child resources from the object data. This method exists only on the top-level API root object but it affects all objects bounds as descendant of this API root.
-
-<spec>apiRoot.**$id**(idFn:_Function_)</spec>
-
-Specifies globally for this API the id function providing the name and child resource sub-path. For APIs that consistently use the same field name as id, this can save some typing and code maintenance.
-
-`fn` takes the object to bind as argument and returns the name to use as property.
-
-This global id function can be overridden by passing a function argument to [`$bind`](#_bind).
+Same as above but adds multiple items at once.
 
 </xmp>
 <hr/>
