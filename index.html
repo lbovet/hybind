@@ -155,15 +155,9 @@ Binds and sets an existing `child` object or array as a property of `obj`. The p
 
 Returns the child object/array.
 
-<spec>obj.**$bind**(child:_Object_) : _Object_</spec>
-
-Binds and sets an existing `child` object as a property of `obj`. The property name and child resource sub-path is computed using the function registered with the [`$id`](#_id) method of the API root object.
-
-Returns the child object.
-
 <spec>obj.**$bind**(child:_Object_, idFn: _Function_) : _Object_</spec>
 
-Binds and sets an existing `child` object as a property of `obj`. The property name and child resource sub-path is computed by the `idFn` function applied to the child object (See also the [`$id`](#_id) method).
+Binds and sets an existing `child` object as a property of `obj`. The property name and child resource sub-path is computed by the `idFn` function applied to the child object.
 
 Returns the child object.
 
