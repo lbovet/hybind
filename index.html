@@ -139,7 +139,7 @@ See their respective documentation under [Framework Details](#Framework_Details)
 
 ### $bind
 
-Binds a child resource
+Binds a child resource.
 
 <spec>obj.**$bind**(name:_string_) : _Object_</spec>
 
@@ -163,13 +163,13 @@ Returns the child object.
 
 ### $load
 
-Fetches the resource data and fills the object with it.
+Fetches the resource data and fills the object with it. It also binds linked resources as properties so that links can be followed in a pure HATEOS way.
 
 <spec>objOrArr.**$load**() : _Promise&lt;Object>_</spec>
 
 Performs a GET request to retrieve the data of the bound resource and fill `objOrArr`.
 
-If `objOrArr` is an array, it is expected that the resource is a collection and its  representation contains the collection items in the `_embedded` property.
+If `objOrArr` is an array, it is expected that the resource is a collection and its representation contains the collection items in the `_embedded` property.
 
 `objectOrArray` will be emptied before being filled in case it was not an empty object or array.
 
