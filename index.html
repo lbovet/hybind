@@ -151,7 +151,7 @@ Returns the child object.
 
 <spec>obj.**$bind**(name:_string_, child:_Object_|_Array_) : _Object_</spec>
 
-Binds and sets an existing `child` object or array as a property of `obj`. The property name and child resource sub-path is given by `name`. Passing an array means that the resource corresponds to a collection.
+Binds and sets an existing `child` object or array as a property of `obj`. If `obj[name]` was not previously bound (e.g. via [`$load`](#_load)), then the child resource sub-path is given by `name`, otherwise it will reuse the previously bound resource URL so that links are followed in a pure HATEOAS way. Passing an array means that the resource corresponds to a collection.
 
 Returns the child object/array.
 
