@@ -49,6 +49,14 @@ describe 'hybind', ->
       it 'should fail if id function is missing', ->
         api = @api
         expect(-> api.$bind @john).toThrow 'No property or id specified'
+      it 'should rebind new object with previous reference', ->
+        @api.$bind 'john', @john
+        @john.$bind.ref = 'http://remotehost/john'
+        john2 = name: 'john2'
+        @api.$bind 'john2', john2
+        @api.$bind 'john', john2
+        expect(john2.$bind.self).toBe 'http://localhost/john2'
+        expect(john2.$bind.ref).toBe 'http://remotehost/john'
 
     describe 'collections', ->
       it 'should be supported as parameter', ->

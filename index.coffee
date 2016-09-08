@@ -90,6 +90,7 @@
           args.shift()
         else
           prop = arg
+          prev = obj[prop]?.$bind?.ref
           target = obj[prop] or obj[prop] = {}
         link = args[0]
         link = link target if typeof link is 'function'
@@ -102,14 +103,15 @@
         pathOrUrl = args[1]
         pathOrUrl ?= link
         pathOrUrl = clean pathOrUrl
+        ref = prev or clean makeUrl selfLink(obj), pathOrUrl
         if not target.$bind
           if not pathOrUrl then throw 'No property or id specified'
-          enrich target, makeUrl selfLink(obj), pathOrUrl
+          enrich target, ref
         else
           if (obj instanceof Array)
             target.$bind.ref = obj?.$bind?.self+'/'+target.$bind.self.split('/')[-1..]
           else
-            target.$bind.ref = clean makeUrl selfLink(obj), pathOrUrl
+            target.$bind.ref = ref
           target
       if url
         obj.$bind.ref = clean url
