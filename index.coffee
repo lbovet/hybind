@@ -57,7 +57,7 @@
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
             bind item
-          break      
+          break
     req = (r, params) ->
       d = deferred()
       opts = {}
