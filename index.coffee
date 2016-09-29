@@ -46,6 +46,8 @@
         delete item._links
     collMapper = (obj, coll, opts) ->
       coll.length = 0
+      if obj.page
+        coll.$page = obj.page
       if obj._embedded
         for k,v of obj._embedded
           for item in v
@@ -55,7 +57,7 @@
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
             bind item
-          break
+          break      
     req = (r, params) ->
       d = deferred()
       opts = {}
