@@ -8,8 +8,7 @@
       (q, http) ->
        req = (opts) ->
          d = q.defer()
-         http(opts).then (res) ->
-           d.resolve res.data, res
+         http(opts).then ((res) -> d.resolve res.data, res), ((res) -> d.reject res.data, res)
          d.promise
        factory root.angular, q.defer, req ]
   else
