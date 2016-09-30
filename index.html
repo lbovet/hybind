@@ -123,6 +123,8 @@ Bound objects are enriched with the following methods:
 | [`$remove`](#_remove) | Deletes an association | DELETE |
 | [`$share`](#_share) | Keeps objects in a shared cache to avoid loading them multiple times | - |
 
+When loaded, collections are enriched with the `$resource` property, which contains the original resource (without the `_embedded` property).
+
 ### hybind
 This is the entry point of the library.
 <spec>**hybind**(pathOrUrl:_string_) : _Object_</spec>
@@ -169,9 +171,9 @@ Fetches the resource data and fills the object with it. It also binds linked res
 
 Performs a GET request to retrieve the data of the bound resource and fill `objOrArr`.
 
-If `objOrArr` is an array, it is expected that the resource is a collection and its representation contains the collection items in the `_embedded` property.
+If `objOrArr` is an array, it is expected that the resource is a collection and its representation contains the collection items in the `_embedded` property. Also, a `$resource` property will be added to `objOrArr` with the loaded resource content without the `_embedded` property.
 
-`objectOrArray` will be emptied before being filled in case it was not an empty object or array.
+`objectOrArr` will be emptied before being filled in case it was not an empty object or array.
 
 Returns a promise resolved to `objOrArray` after being filled. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
