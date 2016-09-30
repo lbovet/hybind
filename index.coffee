@@ -55,6 +55,8 @@
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
             bind item
           break
+        delete obj.embedded
+        coll.$resource = obj
     req = (r, params) ->
       d = deferred()
       opts = {}

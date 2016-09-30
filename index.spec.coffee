@@ -232,6 +232,7 @@ describe 'hybind', ->
               ,
                 city: 'Paris'
             ]
+          page: number: 0
         addresses.$load().then ->
           expect(addresses.length).toBe 2
           expect(addresses[0].city).toBe 'London'
@@ -240,6 +241,8 @@ describe 'hybind', ->
           expect(addresses[0].$bind.self).toBe 'http://localhost/london'
           expect(addresses[0].$bind.ref).toBe 'http://localhost/addresses/london'
           expect(addresses[1].$load).toBeUndefined()
+          expect(addresses.$resource).toBeDefined()
+          expect(addresses.$resource.page.number).toBe 0
           done()
         .done()
 
