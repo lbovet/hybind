@@ -137,11 +137,14 @@
           items = [ items ] if not (items instanceof Array)
           data = (selfLink item for item in items)
           req method: 'POST', url: selfLink(obj), data: data.join '\n'
+        obj.$save = ->
+          data = (selfLink item for item in obj)
+          req method: 'PUT', url: selfLink(obj), data: data.join '\n'
       else
         obj.$set = (item) ->
           item ?= obj
           req method: 'PUT', url: obj.$bind.ref, data: selfLink item
-      obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
+        obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
       obj.$create = (item) ->
         d = deferred()
         req method: 'POST', url: selfLink(obj), data: (item or {})
