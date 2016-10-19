@@ -289,3 +289,15 @@ describe 'hybind', ->
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://localhost/addresses/london'
             done()
+
+    describe '$save', ->
+      it 'replaces the collection content', (done) ->
+        addresses = @addresses
+        http = @http
+        addresses.push addresses.$bind "london"
+        addresses.push addresses.$bind "paris"
+        addresses.$save().then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT', url: 'http://localhost/addresses'
+            data: "http://localhost/addresses/london\nhttp://localhost/addresses/paris"
+          done()
