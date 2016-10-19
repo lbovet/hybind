@@ -186,13 +186,21 @@ Same as above but with
 
 ### $save
 
-Updates the bound resource with the object data.
+Updates the bound resource with the object data or updates a collection content.
 
 <spec>obj.**$save**() : _Promise_</spec>
 
 Performs a PUT request to create/update the bound resource with the content of `obj`.
 
 According to the REST API conventions, this can be used to create the resource if it does not exist. Otherwise, use [`$create`](#_create).
+
+Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+
+<spec>arr.**$save**() : _Promise_</spec>
+
+Performs a PUT request to create/update the collection content assuming that the REST API supports it the same way as Spring Data Rest [does](http://docs.spring.io/spring-data/rest/docs/current/reference/html/#repository-resources.association-resource).
+
+This resets the collection to contain all resources corresponding to the items of `arr`. The ordering is respected.
 
 Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
