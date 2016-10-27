@@ -43,7 +43,7 @@
           else
             item.$bind.self = clean link.href
         delete item._links
-    collMapper = (obj, coll, opts) ->
+    collMapper = (obj, coll) ->
       coll.length = 0
       if obj._embedded
         for k,v of obj._embedded
@@ -57,9 +57,9 @@
           break
         delete obj.embedded
         coll.$resource = obj
-    req = (r, params) ->
+    req = (r, params, opts) ->
       d = deferred()
-      opts = {}
+      opts ?= {}
       extend opts, defaults
       extend opts, r
       opts.headers = {}
@@ -122,7 +122,7 @@
         req {method: 'GET', url: obj.$bind.ref}, params
         .then (data) ->
           if (obj instanceof Array)
-            collMapper data, obj, opts
+            collMapper data, obj
           else
             for prop of obj
               if typeof obj[prop] != 'function'
@@ -133,21 +133,22 @@
         , d.reject
         promise d
       if (obj instanceof Array)
-        obj.$add = (items) ->
+        obj.$add = (items, params, opts) ->
           items = [ items ] if not (items instanceof Array)
           data = (selfLink item for item in items)
-          req method: 'POST', url: selfLink(obj), data: data.join '\n'
-        obj.$save = ->
+          req method: 'POST', url: selfLink(obj), data: data.join('\n'), params, opts
+        obj.$save = (params, opts) ->
           data = (selfLink item for item in obj)
-          req method: 'PUT', url: selfLink(obj), data: data.join '\n'
+          req method: 'PUT', url: selfLink(obj), data: data.join('\n'), params, opts
       else
-        obj.$set = (item) ->
+        obj.$set = (item, params, opts) ->
           item ?= obj
-          req method: 'PUT', url: obj.$bind.ref, data: selfLink item
-        obj.$save = -> req method: 'PUT', url: selfLink(obj), data: obj
-      obj.$create = (item) ->
+          req method: 'PUT', url: obj.$bind.ref, data: selfLink(item), params, opts
+        obj.$save = (params, opts) ->
+          req method: 'PUT', url: selfLink(obj), data: obj, params, opts
+      obj.$create = (item, params, opts) ->
         d = deferred()
-        req method: 'POST', url: selfLink(obj), data: (item or {})
+        req method: 'POST', url: selfLink(obj), data: (item or {}), params, opts
         .then (data) ->
           extend(item, data) if item
           item ?= data
@@ -156,13 +157,13 @@
           d.resolve item
         , d.reject
         promise d
-      obj.$delete = ->
+      obj.$delete = (params, opts)->
         if obj.$bind.self
-          req method: 'DELETE', url: obj.$bind.self
+          req method: 'DELETE', url: obj.$bind.self, params, opts
         else
-          obj.$load().then -> req method: 'DELETE', url: obj.$bind.self
+          obj.$load(params, opts).then -> req method: 'DELETE', url: obj.$bind.self, params, opts
       removeLink = selfLink obj
-      obj.$remove = -> req method: 'DELETE', url: obj.$bind.ref
+      obj.$remove = (params, opts) -> req method: 'DELETE', url: obj.$bind.ref, params, opts
       obj.$share = (args...) ->
         while args.length > 0
           arg = args.shift()

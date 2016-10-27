@@ -131,6 +131,13 @@ describe 'hybind', ->
             data: JSON.stringify name: 'john'
           done()
 
+      it 'should support parameters', (done) ->
+        http = @http
+        @john.$save(p: true).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            url: 'http://localhost/john?p=true'
+          done()
+
     describe '$delete', ->
       it 'should DELETE the loaded self link', (done) ->
         http = @http
@@ -142,6 +149,13 @@ describe 'hybind', ->
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://remotehost/john'
             done()
+
+      it 'should support parameters', (done) ->
+        http = @http
+        @john.$delete(p: true).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            url: 'http://localhost/john?p=true'
+          done()
 
     describe '$create', ->
       it 'without argument should POST empty object', (done) ->
@@ -165,6 +179,14 @@ describe 'hybind', ->
           expect(bob.$bind.self).toBe 'http://localhost/1'
           done()
 
+      it 'should support parameters', (done) ->
+        http = @http
+        http.andReturn Q name: 'bob', _links: self: href: 'http://localhost/1'
+        @john.$create(null, p: true).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            url: 'http://localhost/john?p=true'
+          done()
+
     describe '$remove', ->
       it 'should issue a DELETE request', (done) ->
         http = @http
@@ -184,6 +206,13 @@ describe 'hybind', ->
               method: 'DELETE', url: 'http://localhost/john'
             done()
 
+      it 'should support parameters', (done) ->
+        http = @http
+        @john.$remove(p: true).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            url: 'http://localhost/john?p=true'
+          done()
+
     describe '$set', ->
       it 'should issue a PUT request', (done) ->
         http = @http
@@ -194,6 +223,13 @@ describe 'hybind', ->
             method: 'PUT'
             url: 'http://localhost/john/father'
             data: 'http://localhost/paul'
+          done()
+
+      it 'should support parameters', (done) ->
+        http = @http
+        @john.$set(null, p: true).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            url: 'http://localhost/john?p=true'
           done()
 
     describe '$share', ->
@@ -268,6 +304,15 @@ describe 'hybind', ->
             method: 'POST', url: 'http://localhost/addresses'
             data: 'http://localhost/newyork\nhttp://localhost/newdehli'
           done()
+
+      it 'should support parameters', (done) ->
+        addresses = @addresses
+        http = @http
+        addresses.$add({}, p: true).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            url: 'http://localhost/addresses?p=true'
+          done()
+
 
     describe '$remove', ->
       it 'should delete association', (done) ->
