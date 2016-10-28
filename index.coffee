@@ -56,7 +56,7 @@
           break
         delete obj.embedded
         Object.defineProperty coll, '$resource', enumerable: false, value: obj
-    req = (r, params, opts) ->
+    req = (r, params, opts, result) ->
       d = deferred()
       opts ?= {}
       extend opts, defaults
@@ -78,7 +78,7 @@
             data = JSON.parse(data)
         catch e
           d.reject e
-        d.resolve data
+        d.resolve result or data
       , d.reject
       promise d
     enrich = (obj, url) ->
@@ -118,7 +118,7 @@
         obj.$bind.self ?= obj.$bind.ref
       Object.defineProperty obj, '$load', enumerable: false, value: (params, opts) ->
         d = deferred()
-        req {method: 'GET', url: obj.$bind.ref}, params
+        req {method: 'GET', url: obj.$bind.ref}, params, opts
         .then (data) ->
           if (obj instanceof Array)
             collMapper data, obj
@@ -135,16 +135,16 @@
         Object.defineProperty obj, '$add', enumerable: false, value: (items, params, opts) ->
           items = [ items ] if not (items instanceof Array)
           data = (selfLink item for item in items)
-          req method: 'POST', url: selfLink(obj), data: data.join('\n'), params, opts
+          req method: 'POST', url: selfLink(obj), data: data.join('\n'), params, opts, obj
         Object.defineProperty obj, '$save', enumerable: false, value: (params, opts) ->
           data = (selfLink item for item in obj)
-          req method: 'PUT', url: selfLink(obj), data: data.join('\n'), params, opts
+          req method: 'PUT', url: selfLink(obj), data: data.join('\n'), params, opts, obj
       else
         Object.defineProperty obj, '$set', enumerable: false, value: (item, params, opts) ->
           item ?= obj
-          req method: 'PUT', url: obj.$bind.ref, data: selfLink(item), params, opts
+          req method: 'PUT', url: obj.$bind.ref, data: selfLink(item), params, opts, obj
         Object.defineProperty obj, '$save', enumerable: false, value: (params, opts) ->
-          req method: 'PUT', url: selfLink(obj), data: obj, params, opts
+          req method: 'PUT', url: selfLink(obj), data: obj, params, opts, obj
       Object.defineProperty obj, '$create', enumerable: false, value: (item, params, opts) ->
         d = deferred()
         req method: 'POST', url: selfLink(obj), data: (item or {}), params, opts
@@ -158,11 +158,11 @@
         promise d
       Object.defineProperty obj, '$delete', enumerable: false, value: (params, opts)->
         if obj.$bind.self
-          req method: 'DELETE', url: obj.$bind.self, params, opts
+          req method: 'DELETE', url: obj.$bind.self, params, opts, obj
         else
-          obj.$load(params, opts).then -> req method: 'DELETE', url: obj.$bind.self, params, opts
-      removeLink = selfLink obj
-      Object.defineProperty obj, '$remove', enumerable: false, value: (params, opts) -> req method: 'DELETE', url: obj.$bind.ref, params, opts
+          obj.$load(params, opts).then -> req method: 'DELETE', url: obj.$bind.self, params, opts, obj
+      Object.defineProperty obj, '$remove', enumerable: false, value: (params, opts) ->
+        req method: 'DELETE', url: obj.$bind.ref, params, opts, obj
       Object.defineProperty obj, '$share', enumerable: false, value: (args...) ->
         while args.length > 0
           arg = args.shift()

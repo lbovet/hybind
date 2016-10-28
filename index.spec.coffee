@@ -125,7 +125,9 @@ describe 'hybind', ->
     describe '$save', ->
       it 'should issue a PUT request', (done) ->
         http = @http
-        @john.$save().then ->
+        john = @john
+        @john.$save().then (obj) ->
+          expect(obj).toBe john
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', url: 'http://localhost/john'
             data: JSON.stringify name: 'john'
@@ -144,8 +146,8 @@ describe 'hybind', ->
         http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
-          http.reset()
-          john.$delete().then ->
+          john.$delete().then (obj) ->
+            expect(obj).toBe john
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://remotehost/john'
             done()
@@ -190,7 +192,9 @@ describe 'hybind', ->
     describe '$remove', ->
       it 'should issue a DELETE request', (done) ->
         http = @http
-        @john.$remove().then ->
+        john = @john
+        @john.$remove().then (obj) ->
+          expect(obj).toBe john
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'DELETE', url: 'http://localhost/john'
           done()
@@ -201,7 +205,8 @@ describe 'hybind', ->
         john = @john
         john.$load().then ->
           http.reset()
-          john.$remove().then ->
+          john.$remove().then (obj) ->
+            expect(obj).toBe john
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://localhost/john'
             done()
@@ -218,7 +223,8 @@ describe 'hybind', ->
         http = @http
         paul = @api.$bind "paul"
         father = @john.$bind "father"
-        father.$set(paul).then ->
+        father.$set(paul).then (obj) ->
+          expect(obj).toBe father
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT'
             url: 'http://localhost/john/father'
