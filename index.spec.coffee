@@ -313,7 +313,6 @@ describe 'hybind', ->
             url: 'http://localhost/addresses?p=true'
           done()
 
-
     describe '$remove', ->
       it 'should delete association', (done) ->
         addresses = @addresses
