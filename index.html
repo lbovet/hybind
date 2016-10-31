@@ -123,7 +123,9 @@ Bound objects are enriched with the following methods:
 | [`$remove`](#_remove) | Deletes an association | DELETE |
 | [`$share`](#_share) | Keeps objects in a shared cache to avoid loading them multiple times | - |
 
-When loaded, collections are enriched with the `$resource` property, which contains the original resource (without the `_embedded` property).
+| Property | Description |
+|--------|-------------|
+| [`$resource`](#_resource)   | After `$load`, contains the original resource of collections |
 
 ### hybind
 This is the entry point of the library.
@@ -194,7 +196,7 @@ Performs a PUT request to create/update the bound resource with the content of `
 
 According to the REST API conventions, this can be used to create the resource if it does not exist. Otherwise, use [`$create`](#_create).
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `obj` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>arr.**$save**() : _Promise&lt;Object>_</spec>
 
@@ -202,7 +204,7 @@ Performs a PUT request to create/update the collection content assuming that the
 
 This resets the collection to contain all resources corresponding to the items of `arr`. The ordering is respected.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `arr` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>objOrArr.**$save**(parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
 
@@ -243,7 +245,7 @@ Performs a DELETE request on the resource bound to `obj`.
 
 This does _not_ modify `obj` nor its parent, it only deletes the resource in the server.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `obj` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>obj.**$delete**(parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
 
@@ -264,7 +266,7 @@ This does _not_ modify `child` nor its parent, it only updates the server state.
 
 Note that if `child` has not been loaded with `$load` beforehand, the operation _may_ fail. Indeed, REST API implementations may require that clients use the _self link_ instead of arbitrary links to the resource. This is the case for Spring Data Rest. `$load` obtains this self link.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `child` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>child.**$set**(newChild:_Object_) : _Promise&lt;Object>_</spec>
 
@@ -274,7 +276,7 @@ This does _not_ modify `child` nor its parent, it only updates the server state.
 
 Note that if `newChild` has not been loaded with `$load` beforehand, the operation _may_ fail. Indeed, REST API implementations may require that clients use the _self link_ instead of arbitrary links to the resource. This is the case for Spring Data Rest. `$load` obtains this self link.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `child` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>child.**$set**(newChild:_Object_, parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
 
@@ -295,7 +297,7 @@ This does _not_ modify `arr` nor `item`, it only updates the server state.
 
 Note that if `item` has not been loaded with `$load` beforehand, the operation _may_ fail. Indeed, REST API implementations may require that clients use the _self link_ instead of arbitrary links to the resource. This is the case for Spring Data Rest. `$load` obtains this self link.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `arr` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>arr.**$add**(items:_Array&lt;Object>_) : _Promise&lt;Object>_</spec>
 
@@ -318,7 +320,7 @@ Removes the association between `childOrItem` and the parent or containing colle
 
 This does _not_ modify `childOrItem` nor its parent or containing collection, it only updates the server state.
 
-Returns a promise resolved in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
+Returns a promise resolving to `childOrItem` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
 <spec>childOrItem.**$remove**(parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
 
@@ -342,6 +344,10 @@ Returns the value of the property. That is, the cached object if it was already 
 Creates a property in `cache` containing the value of the child object `obj[name]` if it does not yet exist. The property name is the URL of the child object (self link).
 
 Returns the value of the property. That is, the cached object if it was already in cache or `obj[name]` if it was not in cache.
+
+### $resource
+
+On [`$load`](#_load), collections are enriched with a `$resource` property containing the original resource representation returned by the GET request but without the `_embedded` field, since it contents is copied into the array items. It typically gives access to paging metadata.
 
 </xmp>
 <hr/>
