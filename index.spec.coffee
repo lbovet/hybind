@@ -264,7 +264,8 @@ describe 'hybind', ->
 
     describe '$load', ->
       it 'should map collections', (done) ->
-        addresses = @addresses
+        addresses = {}
+        @api.$bind 'addresses', addresses
         @http.andReturn Q
           _links: self: href: addresses.$bind.self
           _embedded:
@@ -276,6 +277,8 @@ describe 'hybind', ->
             ]
           page: number: 0
         addresses.$load().then ->
+          expect(addresses.__proto__).toBe Array.prototype
+          expect(addresses.$add).toBeDefined()
           expect(addresses.length).toBe 2
           expect(addresses[0].city).toBe 'London'
           expect(addresses[1].city).toBe 'Paris'

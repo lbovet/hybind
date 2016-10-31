@@ -55,7 +55,7 @@
             bind item
           break
         delete obj.embedded
-        Object.defineProperty coll, '$resource', enumerable: false, value: obj
+        Object.defineProperty coll, '$resource', configurable: true, enumerable: false, value: obj
     req = (r, params, opts, result) ->
       d = deferred()
       opts ?= {}
@@ -81,45 +81,54 @@
         d.resolve result or data
       , d.reject
       promise d
+    defProp = (obj, name, value) ->
+      Object.defineProperty obj, name, configurable: true, enumerable: false, value: value
     enrich = (obj, url) ->
-      Object.defineProperty obj, '$bind', enumerable: false, value: ->
-        args = Array.prototype.slice.call arguments
-        arg = args[0]
-        if typeof arg is 'object'
-          target = arg
-          args.shift()
-        else
-          prop = arg
-          prev = obj[prop]?.$bind?.ref
-          target = obj[prop] or obj[prop] = {}
-        link = args[0]
-        link = link target if typeof link is 'function'
-        link = idFn target if link is undefined
-        arg = args[1]
-        if typeof arg is 'object'
-          target = arg
-          obj[prop] = target if prop
-          args.shift()
-        pathOrUrl = args[1]
-        pathOrUrl ?= link
-        pathOrUrl = clean pathOrUrl
-        ref = prev or clean makeUrl selfLink(obj), pathOrUrl
-        if not target.$bind
-          if not pathOrUrl then throw 'No property or id specified'
-          enrich target, ref
-        else
-          if (obj instanceof Array)
-            target.$bind.ref = obj?.$bind?.self+'/'+target.$bind.self.split('/')[-1..]
+      if not obj.$bind
+         defProp obj, '$bind', ->
+          args = Array.prototype.slice.call arguments
+          arg = args[0]
+          if typeof arg is 'object'
+            target = arg
+            args.shift()
           else
-            target.$bind.ref = ref
-          target
+            prop = arg
+            prev = obj[prop]?.$bind?.ref
+            target = obj[prop] or obj[prop] = {}
+          link = args[0]
+          link = link target if typeof link is 'function'
+          link = idFn target if link is undefined
+          arg = args[1]
+          if typeof arg is 'object'
+            target = arg
+            obj[prop] = target if prop
+            args.shift()
+          pathOrUrl = args[1]
+          pathOrUrl ?= link
+          pathOrUrl = clean pathOrUrl
+          ref = prev or clean makeUrl selfLink(obj), pathOrUrl
+          if not target.$bind
+            if not pathOrUrl then throw 'No property or id specified'
+            enrich target, ref
+          else
+            if (obj instanceof Array)
+              target.$bind.ref = obj?.$bind?.self+'/'+target.$bind.self.split('/')[-1..]
+            else
+              target.$bind.ref = ref
+            target
       if url
         obj.$bind.ref = clean url
         obj.$bind.self ?= obj.$bind.ref
-      Object.defineProperty obj, '$load', enumerable: false, value: (params, opts) ->
+      defProp obj, '$load',  (params, opts) ->
         d = deferred()
         req {method: 'GET', url: obj.$bind.ref}, params, opts
         .then (data) ->
+          if data._embedded and data._embedded[Object.keys(data._embedded)[0]] instanceof Array and not (obj instanceof Array)
+            if Object.setPrototypeOf
+              Object.setPrototypeOf(obj, Array.prototype)
+            else
+              obj.__proto__ = Array.prototype
+            enrich obj
           if (obj instanceof Array)
             collMapper data, obj
           else
@@ -132,20 +141,22 @@
         , d.reject
         promise d
       if (obj instanceof Array)
-        Object.defineProperty obj, '$add', enumerable: false, value: (items, params, opts) ->
+        defProp obj, '$add',  (items, params, opts) ->
           items = [ items ] if not (items instanceof Array)
           data = (selfLink item for item in items)
           req method: 'POST', url: selfLink(obj), data: data.join('\n'), params, opts, obj
-        Object.defineProperty obj, '$save', enumerable: false, value: (params, opts) ->
+        defProp obj, '$save',  (params, opts) ->
           data = (selfLink item for item in obj)
           req method: 'PUT', url: selfLink(obj), data: data.join('\n'), params, opts, obj
+        delete obj.$set
       else
-        Object.defineProperty obj, '$set', enumerable: false, value: (item, params, opts) ->
+        defProp obj, '$set',  (item, params, opts) ->
           item ?= obj
           req method: 'PUT', url: obj.$bind.ref, data: selfLink(item), params, opts, obj
-        Object.defineProperty obj, '$save', enumerable: false, value: (params, opts) ->
+        defProp obj, '$save',  (params, opts) ->
           req method: 'PUT', url: selfLink(obj), data: obj, params, opts, obj
-      Object.defineProperty obj, '$create', enumerable: false, value: (item, params, opts) ->
+        delete obj.$add
+      defProp obj, '$create',  (item, params, opts) ->
         d = deferred()
         req method: 'POST', url: selfLink(obj), data: (item or {}), params, opts
         .then (data) ->
@@ -156,14 +167,14 @@
           d.resolve item
         , d.reject
         promise d
-      Object.defineProperty obj, '$delete', enumerable: false, value: (params, opts)->
+      defProp obj, '$delete',  (params, opts)->
         if obj.$bind.self
           req method: 'DELETE', url: obj.$bind.self, params, opts, obj
         else
           obj.$load(params, opts).then -> req method: 'DELETE', url: obj.$bind.self, params, opts, obj
-      Object.defineProperty obj, '$remove', enumerable: false, value: (params, opts) ->
+      defProp obj, '$remove',  (params, opts) ->
         req method: 'DELETE', url: obj.$bind.ref, params, opts, obj
-      Object.defineProperty obj, '$share', enumerable: false, value: (args...) ->
+      defProp obj, '$share',  (args...) ->
         while args.length > 0
           arg = args.shift()
           switch typeof arg
