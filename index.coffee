@@ -103,6 +103,8 @@
             target = arg
             obj[prop] = target if prop
             args.shift()
+          else
+            prev = null
           pathOrUrl = args[1]
           pathOrUrl ?= link
           pathOrUrl = clean pathOrUrl
