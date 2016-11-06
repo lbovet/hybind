@@ -38,6 +38,7 @@
             if item.$bind?.self != clean link.href
               p = item[name] or item[name] = {}
               item.$bind p, link.href
+              item.$bind.refs[name] = link.href
               bind item[name]
           else
             item.$bind.self = clean link.href
@@ -108,16 +109,17 @@
           pathOrUrl = args[1]
           pathOrUrl ?= link
           pathOrUrl = clean pathOrUrl
-          ref = prev or clean makeUrl selfLink(obj), pathOrUrl
+          ref = obj.$bind.refs?[prop] or prev or clean makeUrl selfLink(obj), pathOrUrl
           if not target.$bind
             if not pathOrUrl then throw 'No property or id specified'
             enrich target, ref
           else
             if (obj instanceof Array)
-              target.$bind.ref = obj?.$bind?.self+'/'+target.$bind.self.split('/')[-1..]
+              target.$bind.ref = obj.$bind?.self+'/'+target.$bind.self.split('/')[-1..]
             else
               target.$bind.ref = ref
             target
+      obj.$bind.refs = {}
       if url
         obj.$bind.ref = clean url
         obj.$bind.self ?= obj.$bind.ref

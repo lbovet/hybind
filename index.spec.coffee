@@ -31,6 +31,10 @@ describe 'hybind', ->
       it 'should have an overridable url', ->
         obj = @api.$bind 'hello', 'http://remotehost'
         expect(obj.$bind.self).toBe 'http://remotehost'
+      it 'should use reference from catalog', ->
+        @api.$bind.refs = hello: 'http://remotehost/hello'
+        obj = @api.$bind 'hello'
+        expect(obj.$bind.ref).toBe 'http://remotehost/hello'
 
     describe 'with object', ->
       it 'should create a self link with given link', ->
@@ -57,6 +61,10 @@ describe 'hybind', ->
         @api.$bind 'john', john2
         expect(john2.$bind.self).toBe 'http://localhost/john2'
         expect(john2.$bind.ref).toBe 'http://remotehost/john'
+      it 'should use reference from catalog', ->
+        @api.$bind.refs = john: 'http://remotehost/john'
+        obj = @api.$bind 'john', @john
+        expect(@john.$bind.ref).toBe 'http://remotehost/john'
 
     describe 'collections', ->
       it 'should be supported as parameter', ->
@@ -105,7 +113,7 @@ describe 'hybind', ->
           expect(john.$bind.self).toBe 'http://remotehost/john'
           done()
 
-      it 'should replace the association reference if present', (done) ->
+      it 'should not replace the association reference if present', (done) ->
         @http.andReturn Q _links: self: href: 'http://remotehost/john'
         john = @john
         john.$load().then ->
@@ -120,6 +128,15 @@ describe 'hybind', ->
         john.$load().then ->
           expect(john.address).toBeDefined()
           expect(john.address.$bind.self).toBe 'http://localhost/john/address'
+          done()
+
+      it 'should create reference catalog', (done) ->
+        @http.andReturn Q _links:
+          self: href: @john.$bind.self
+          address: href: 'http://localhost/john/address'
+        john = @john
+        john.$load().then ->
+          expect(john.$bind.refs.address).toBe 'http://localhost/john/address'
           done()
 
     describe '$save', ->
