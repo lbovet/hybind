@@ -160,6 +160,20 @@ describe 'hybind', ->
             url: 'http://localhost/john?p=true'
           done()
 
+      it 'saves attached associations', (done) ->
+        http = @http
+        @john.primary = @api.$bind 'london', city: 'London'
+        @john.secondary = @api.$bind 'paris', city: 'Paris'
+        @john.$bind 'others', [ @api.$bind('newyork', city: 'New York') ]
+        @john.$bind 'work', [ @api.$bind('newdehli', city: 'New Dehli') ]
+        @john.$save(['primary', 'others']).then ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            data: JSON.stringify
+              name: 'john'
+              primary: 'http://localhost/london'
+              others: [ 'http://localhost/newyork' ]
+          done()
+
     describe '$delete', ->
       it 'should DELETE the loaded self link', (done) ->
         http = @http
@@ -209,7 +223,7 @@ describe 'hybind', ->
             url: 'http://localhost/john?p=true'
           done()
 
-      iit 'should replace bound objects with their self link', (done) ->
+      it 'should replace bound objects with their self link', (done) ->
         http = @http
         http.andReturn Q name: 'bob', _links: self: href: 'http://localhost/1'
         bob = name: 'bob', addresses: [ @api.$bind('address', city: 'London') ]
@@ -218,7 +232,6 @@ describe 'hybind', ->
             method: 'POST', url: 'http://localhost',
             data: JSON.stringify name: 'bob', addresses: [ 'http://localhost/address' ]
           expect(obj.$bind.self).toBe 'http://localhost/1'
-          expect(bob.$bind.self).toBe 'http://localhost/1'
           done()
 
     describe '$remove', ->

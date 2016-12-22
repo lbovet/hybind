@@ -20,9 +20,21 @@
   http ?= fw.ajax
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
-  str = (obj, replace) -> JSON.stringify obj, (k,v) ->
-    result = v?.$bind?.self if replace
-    result or (v if k is "" or not v?.$bind)
+  str = (obj, attached) ->
+    array = undefined
+    root = true
+    JSON.stringify obj, (k,v) ->
+      if not root
+        if attached and (attached.length == 0 or k in attached) or array
+          if not (v instanceof Array)
+            result = v?.$bind?.self
+          else if (attached.length == 0 or k in attached)
+            array = k
+            result = v.slice(0)
+        if not Number.isInteger(k) and array is not k
+          array = false
+      root = false
+      result or (v if k is '' or not v?.$bind)
   makeUrl = (baseUrl, pathOrUrl) ->
     if not pathOrUrl then return
     baseUrl += '/' if baseUrl[-1..] != '/'
@@ -59,7 +71,7 @@
           break
         delete obj.embedded
         Object.defineProperty coll, '$resource', configurable: true, enumerable: false, value: obj
-    req = (r, params, opts, result) ->
+    req = (r, params, opts, result, attached) ->
       d = deferred()
       opts ?= {}
       extend opts, defaults
@@ -71,7 +83,7 @@
         extend opts.headers, { 'Content-Type': 'text/uri-list' }
       if typeof opts.data == 'object'
         extend opts.headers, { 'Content-Type': 'application/json' }
-        opts.data = str opts.data, opts.method == 'POST'
+        opts.data = str opts.data, if opts.method == 'POST' then [] else attached
       if params
         sep = if opts.url.indexOf('?') == -1 then '?' else '&'
         opts.url = opts.url + sep + ((k+"="+v) for k,v of params).join("&")
@@ -160,7 +172,13 @@
           item ?= obj
           req method: 'PUT', url: obj.$bind.ref, data: selfLink(item), params, opts, obj
         defProp obj, '$save',  (params, opts) ->
-          req method: 'PUT', url: selfLink(obj), data: obj, params, opts, obj
+          if params instanceof Array
+            attached = params
+            params = undefined
+          if opts instanceof Array
+            attached = opts
+            opts = undefined
+          req method: 'PUT', url: selfLink(obj), data: obj, params, opts, obj, attached
         delete obj.$add
       defProp obj, '$create',  (item, params, opts) ->
         d = deferred()
