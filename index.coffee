@@ -45,6 +45,9 @@
     extend defaults.headers, Accept: 'application/json'
     idFn = -> null
     bind = (item)->
+      if item instanceof Array
+        for i in item
+          bind i
       if item?._links
         for name, link of item._links
           self = null
