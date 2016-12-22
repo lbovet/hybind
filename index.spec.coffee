@@ -209,6 +209,18 @@ describe 'hybind', ->
             url: 'http://localhost/john?p=true'
           done()
 
+      iit 'should replace bound objects with their self link', (done) ->
+        http = @http
+        http.andReturn Q name: 'bob', _links: self: href: 'http://localhost/1'
+        bob = name: 'bob', addresses: [ @api.$bind('address', city: 'London') ]
+        @api.$create(bob).then (obj) ->
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'POST', url: 'http://localhost',
+            data: JSON.stringify name: 'bob', addresses: [ 'http://localhost/address' ]
+          expect(obj.$bind.self).toBe 'http://localhost/1'
+          expect(bob.$bind.self).toBe 'http://localhost/1'
+          done()
+
     describe '$remove', ->
       it 'should issue a DELETE request', (done) ->
         http = @http

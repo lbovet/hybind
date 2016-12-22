@@ -20,7 +20,9 @@
   http ?= fw.ajax
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
-  str = (obj) -> JSON.stringify obj, (k,v) -> v if k is "" or not v?.$bind
+  str = (obj, replace) -> JSON.stringify obj, (k,v) ->
+    result = v?.$bind?.self if replace
+    result or (v if k is "" or not v?.$bind)
   makeUrl = (baseUrl, pathOrUrl) ->
     if not pathOrUrl then return
     baseUrl += '/' if baseUrl[-1..] != '/'
@@ -69,7 +71,7 @@
         extend opts.headers, { 'Content-Type': 'text/uri-list' }
       if typeof opts.data == 'object'
         extend opts.headers, { 'Content-Type': 'application/json' }
-        opts.data = str opts.data
+        opts.data = str opts.data, opts.method == 'POST'
       if params
         sep = if opts.url.indexOf('?') == -1 then '?' else '&'
         opts.url = opts.url + sep + ((k+"="+v) for k,v of params).join("&")
