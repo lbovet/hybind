@@ -19,6 +19,9 @@ describe 'hybind', ->
       it 'should create a property object', ->
         @api.$bind 'hello'
         expect(typeof @api.hello).toBe 'object'
+      it 'should bind numeric values', ->
+        obj = @api.$bind 2
+        expect(obj.$bind.self).toBe 'http://localhost/2'
       it 'should have a matching self link', ->
         obj = @api.$bind 'hello'
         expect(obj.$bind.self).toBe 'http://localhost/hello'

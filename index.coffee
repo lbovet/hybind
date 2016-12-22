@@ -19,7 +19,7 @@
   deferred ?= fw.Deferred
   http ?= fw.ajax
   selfLink = (obj) -> obj?.$bind?.self
-  clean = (url) -> url.replace /{.*}/g, '' if url
+  clean = (url) -> String(url).replace /{.*}/g, '' if url
   str = (obj) -> JSON.stringify obj, (k,v) -> v if k is "" or not v?.$bind
   makeUrl = (baseUrl, pathOrUrl) ->
     if not pathOrUrl then return
