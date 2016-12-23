@@ -31,7 +31,7 @@
           else if (attached.length == 0 or k in attached)
             array = k
             result = v.slice(0)
-        if not Number.isInteger(k) and array is not k
+        if not (typeof k is 'number') and array is not k
           array = false
       root = false
       result or (v if k is '' or not v?.$bind)
