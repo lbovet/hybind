@@ -133,6 +133,23 @@ describe 'hybind', ->
           expect(john.address.$bind.self).toBe 'http://localhost/john/address'
           done()
 
+      it 'should bind inline collection items', (done) ->
+        @http.andReturn Q
+          _links:
+            self: href: @john.$bind.self
+            addresses: href: 'http://localhost/john/addresses'
+          addresses: [
+            { _links: self: href: 'http://localhost/london' },
+            { _links: self: href: 'http://localhost/paris' } ]
+        john = @john
+        john.$load().then ->
+          expect(john.addresses).toBeDefined()
+          expect(john.addresses[0]?.$bind?.self).toBeDefined()
+          expect(john.addresses[0]?.$bind?.self).toBe 'http://localhost/london'
+          expect(john.addresses[1]?.$bind?.self).toBeDefined()
+          expect(john.addresses[1]?.$bind?.self).toBe 'http://localhost/paris'
+          done()
+
       it 'should create reference catalog', (done) ->
         @http.andReturn Q _links:
           self: href: @john.$bind.self

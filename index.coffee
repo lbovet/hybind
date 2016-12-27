@@ -57,6 +57,12 @@
           else
             item.$bind.self = clean link.href
         delete item._links
+      if item instanceof Array
+        for i in item
+          link = i?._links?.self?.href
+          if link
+            enrich i, link
+            bind i
     collMapper = (obj, coll) ->
       coll.length = 0
       if obj._embedded
