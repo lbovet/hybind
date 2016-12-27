@@ -198,6 +198,10 @@ According to the REST API conventions, this can be used to create the resource i
 
 Returns a promise resolving to `obj` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
+<spec>obj.**$save**([properties:_Array&lt;string>_]) : _Promise&lt;Object>_</spec>
+
+Same as above but also saves in the same request the specified associations, provided they are set to bound objects. This assumes that the REST API supports receiving inline links in the JSON payload as Spring Data Rest does. If the `properties` array is empty, it saves _all_ properties.
+
 <spec>arr.**$save**() : _Promise&lt;Object>_</spec>
 
 Performs a PUT request to create/update the collection content assuming that the REST API supports it the same way as Spring Data Rest [does](http://docs.spring.io/spring-data/rest/docs/current/reference/html/#repository-resources.association-resource).
@@ -206,7 +210,7 @@ This resets the collection to contain all resources corresponding to the items o
 
 Returns a promise resolving to `arr` in case of success. The promise is rejected in case of error with the same parameters as the promise returned by the underlying HTTP implementation.
 
-<spec>objOrArr.**$save**(parameters:_Object_, [opts:_Object_]) : _Promise&lt;Object>_</spec>
+<spec>objOrArr.**$save**(parameters:_Object_, [opts:_Object_], [properties:_Array&lt;string>_]) : _Promise&lt;Object>_</spec>
 
 Same as above but with
 
@@ -223,6 +227,8 @@ Creates a child resource.
 Performs a POST request to create a collection item or child resource. This assumes that the REST API supports this way of creating objects and returns the created resource in the response.
 
 If no `child` is given, it will default to an empty object.
+
+It will also create associations in the same request if properties are set to bound objects. This assumes that the REST API supports receiving inline links in the JSON payload as Spring Data Rest does.
 
 This does _not_ modify `objOrArr`, it only creates the resource in the server.
 
