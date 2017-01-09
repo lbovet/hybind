@@ -38,7 +38,7 @@
   makeUrl = (baseUrl, pathOrUrl) ->
     if not pathOrUrl then return
     baseUrl += '/' if baseUrl[-1..] != '/'
-    if pathOrUrl.indexOf(':') == -1 then baseUrl + pathOrUrl else pathOrUrl
+    if pathOrUrl.indexOf(':') == -1 then baseUrl + encodeURI(pathOrUrl) else pathOrUrl
   hybind = (url, defaults) ->
     defaults ?= {}
     defaults.headers ?= {}

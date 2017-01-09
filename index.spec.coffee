@@ -38,6 +38,9 @@ describe 'hybind', ->
         @api.$bind.refs = hello: 'http://remotehost/hello'
         obj = @api.$bind 'hello'
         expect(obj.$bind.ref).toBe 'http://remotehost/hello'
+      it 'should url encode arguments', ->
+        obj = @api.$bind 'hello you'
+        expect(obj.$bind.ref).toBe 'http://localhost/hello%20you'
 
     describe 'with object', ->
       it 'should create a self link with given link', ->
