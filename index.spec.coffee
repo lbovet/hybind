@@ -136,6 +136,15 @@ describe 'hybind', ->
           expect(john.address.$bind.self).toBe 'http://localhost/john/address'
           done()
 
+      it 'should not create empty bound objects for null properties', (done) ->
+        @http.andReturn Q address: null, _links:
+          self: href: @john.$bind.self
+          address: href: 'http://localhost/john/address'
+        john = @john
+        john.$load().then ->
+          expect(john.address).toBeNull()
+          done()
+
       it 'should bind inline collection items', (done) ->
         @http.andReturn Q
           _links:

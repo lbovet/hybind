@@ -49,7 +49,7 @@
         for name, link of item._links
           self = null
           if name != 'self'
-            if item.$bind?.self != clean link.href
+            if (item.$bind?.self != clean link.href) and item[name] != null
               p = item[name] or item[name] = {}
               item.$bind p, link.href
               item.$bind.refs[name] = link.href
