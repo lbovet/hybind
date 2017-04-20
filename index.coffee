@@ -65,6 +65,8 @@
             bind i
     collMapper = (obj, coll) ->
       coll.length = 0
+      if obj.page
+        coll.$page = obj.page
       if obj._embedded
         for k,v of obj._embedded
           for item in v
