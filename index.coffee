@@ -11,13 +11,40 @@
          http(opts).then ((res) -> d.resolve res.data, res), d.reject
          d.promise
        factory root.angular, q.defer, req ]
-  else
+  else if root.jQuery or root.$
     root.hybind = factory(root.jQuery or root.$)
+  else
+    root.hybind = factory()
 ) this, (fw, deferred, http) ->
-  extend = fw.extend
-  promise = if deferred then (d) -> d.promise else (d) -> d.promise()
-  deferred ?= fw.Deferred
-  http ?= fw.ajax
+  promise = if deferred or not fw then (d) -> d.promise else (d) -> d.promise()
+  if fw
+    extend = fw.extend
+    deferred ?= fw.Deferred
+    http ?= fw.ajax
+  else
+    extend = (first, second) ->
+      for secondProp of second
+        secondVal = second[secondProp]
+        if secondVal and Object::toString.call(secondVal) == '[object Object]'
+          first[secondProp] = first[secondProp] or {}
+          extend first[secondProp], secondVal
+        else
+          first[secondProp] = secondVal
+      first
+    deferred = () ->
+      d = {}
+      p = new window.Promise (resolve, reject) ->
+        d.resolve = resolve
+        d.reject = reject
+      d.promise = p
+      d
+    http = (opts) ->
+      opts.headers = new Headers opts.headers
+      opts.body = opts.data
+      d = deferred()
+      window.fetch(opts.url, opts).then (res) -> if res.ok then d.resolve res.text() else d.reject res,
+        d.reject
+      promise(d)
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
   str = (obj, attached) ->
