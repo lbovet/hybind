@@ -53,7 +53,7 @@
 
   // Replace hybind@latest with actual version
   var xhttp = new XMLHttpRequest();
-  xhttp.open("GET", "http://cors.maxogden.com/https://registry.npmjs.org/-/package/hybind/dist-tags", true);
+  xhttp.open("GET", "https://crossorigin.me/https://registry.npmjs.org/-/package/hybind/dist-tags", true);
   xhttp.onreadystatechange = function() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {
       var version = JSON.parse(xhttp.responseText).latest;
