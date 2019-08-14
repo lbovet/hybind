@@ -182,6 +182,17 @@ describe 'hybind', ->
             data: JSON.stringify name: 'john'
           done()
 
+      it 'should issue a PUT request by drop the fields on depth level 2 that are object', (done) ->
+        http = @http
+        john = @john
+        john.address = city: name: 'Abanda', toName: 'Oliver', geoPoint: latitude: 1, longitude: 2
+        @john.$save().then (obj) ->
+          expect(obj).toBe john
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT', url: 'http://localhost/john'
+            data: JSON.stringify name: 'john', address: city: name: 'Abanda', toName: 'Oliver'
+          done()
+
       it 'should support parameters', (done) ->
         http = @http
         @john.$save(p: true).then ->
