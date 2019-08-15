@@ -47,7 +47,7 @@
       promise(d)
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
-  limitDeepObjectProperties = (object, maxDepth, currentDepth) ->
+  limitDepth = (object, maxDepth, currentDepth) ->
     if (!(object instanceof Object))
       return;
     if currentDepth == undefined
@@ -59,9 +59,10 @@
         if currentDepth > maxDepth
           delete object[key];
         else
-          limitDeepObjectProperties(child, maxDepth, currentDepth + 1)
+          limitDepth(child, maxDepth, currentDepth + 1)
   str = (obj, attached) ->
-    limitDeepObjectProperties(obj, 2)
+    MAX_DEPTH = 2
+    limitDepth(obj, MAX_DEPTH)
     array = undefined
     root = true
     JSON.stringify obj, (k,v) ->
@@ -97,7 +98,6 @@
               bind item[name]
           else
             item.$bind.self = clean link.href
-        delete item._links
       if item instanceof Array
         for i in item
           link = i?._links?.self?.href
@@ -266,8 +266,12 @@
       postEnrich(obj)
     root =
       $id: (fn) -> idFn = fn
-      $postEnrich: (pe) -> postEnrich = pe
-      $postCollMap: (pcm) -> postCollMap = pcm
+      $postEnrich: (pe) ->
+        postEnrich = pe
+        return
+      $postCollMap: (pcm) ->
+        postCollMap = pcm
+        return
     enrich root, url
   hybind.http = http
   hybind
