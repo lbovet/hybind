@@ -450,14 +450,3 @@ describe 'hybind', ->
             method: 'PUT', url: 'http://localhost/addresses'
             data: "http://localhost/addresses/london\nhttp://localhost/addresses/paris"
           done()
-
-    describe '$postEnrich', ->
-      it 'should set a handler to the postEnrich field', (done) ->
-        addresses = @addresses
-        hy = @hybind('');
-        handler = (obj) -> {
-#          console.log('handle: ' + obj);
-        };
-        hy.$postEnrich(handler)
-        addresses.$save()
-        done()

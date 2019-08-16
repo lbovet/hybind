@@ -50,26 +50,23 @@
   limitDepth = (object, maxDepth, currentDepth) ->
     if (!(object instanceof Object))
       return;
-    if currentDepth == undefined
-      currentDepth = 1;
-    if Array.isArray(object)
-      for child in object
-        limitDepth(child, maxDepth, currentDepth + 1)
-    else
-      keys = Object.keys(object);
-      for key in keys
-        child = object[key];
-        if child instanceof Object
-          if !Array.isArray(child) && currentDepth > maxDepth
-            delete object[key];
-          else
-            limitDepth(child, maxDepth, currentDepth + 1)
+    if object instanceof Array
+      return;
+    firstDepthKeys = Object.keys(object);
+    for firstDepthKey in firstDepthKeys
+      firstDepthChild = object[firstDepthKey];
+      if firstDepthChild instanceof Object && !(firstDepthChild instanceof Array)
+        secondDepthKeys = Object.keys(firstDepthChild);
+        for secondDepthKey in secondDepthKeys
+          secondDepthChild = firstDepthChild[secondDepthKey];
+          if secondDepthChild instanceof Object && !(secondDepthChild instanceof Array)
+            delete firstDepthChild[secondDepthKey]
   str = (obj, attached) ->
-    MAX_DEPTH = 2
-    limitDepth(obj, MAX_DEPTH)
+    clonedObj = Object.assign({}, obj)
+    limitDepth(clonedObj)
     array = undefined
     root = true
-    JSON.stringify obj, (k,v) ->
+    JSON.stringify clonedObj, (k,v) ->
       if not root
         if attached and (attached.length == 0 or k in attached) or array
           if not (v instanceof Array)
