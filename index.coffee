@@ -52,14 +52,18 @@
       return;
     if currentDepth == undefined
       currentDepth = 1;
-    keys = Object.keys(object);
-    for key in keys
-      child = object[key];
-      if child instanceof Object
-        if currentDepth > maxDepth
-          delete object[key];
-        else
-          limitDepth(child, maxDepth, currentDepth + 1)
+    if Array.isArray(object)
+      for child in object
+        limitDepth(child, maxDepth, currentDepth + 1)
+    else
+      keys = Object.keys(object);
+      for key in keys
+        child = object[key];
+        if child instanceof Object
+          if !Array.isArray(child) && currentDepth > maxDepth
+            delete object[key];
+          else
+            limitDepth(child, maxDepth, currentDepth + 1)
   str = (obj, attached) ->
     MAX_DEPTH = 2
     limitDepth(obj, MAX_DEPTH)

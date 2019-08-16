@@ -193,6 +193,17 @@ describe 'hybind', ->
             data: JSON.stringify name: 'john', address: city: name: 'Abanda', toName: 'Oliver'
           done()
 
+      it 'should not drop properties of type Array on depth level 2 and deeper', (done) ->
+        http = @http
+        john = @john
+        john.address = city: name: 'Abanda', toName: 'Oliver', frequencies: [value: 427, unit: 'MHZ']
+        john.$save().then (obj) ->
+          expect(obj).toBe john
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT', url: 'http://localhost/john'
+            data: JSON.stringify name: 'john', address: city: name: 'Abanda', toName: 'Oliver', frequencies: [value: 427, unit: 'MHZ']
+          done()
+
       it 'should support parameters', (done) ->
         http = @http
         @john.$save(p: true).then ->
@@ -439,3 +450,14 @@ describe 'hybind', ->
             method: 'PUT', url: 'http://localhost/addresses'
             data: "http://localhost/addresses/london\nhttp://localhost/addresses/paris"
           done()
+
+    describe '$postEnrich', ->
+      it 'should set a handler to the postEnrich field', (done) ->
+        addresses = @addresses
+        hy = @hybind('');
+        handler = (obj) -> {
+#          console.log('handle: ' + obj);
+        };
+        hy.$postEnrich(handler)
+        addresses.$save()
+        done()
