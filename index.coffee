@@ -47,7 +47,7 @@
       promise(d)
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
-  limitDepth = (object, maxDepth, currentDepth) ->
+  limitDepth = (object) ->
     if (!(object instanceof Object))
       return;
     if object instanceof Array
