@@ -69,7 +69,10 @@
    *   "levelTwoKey4": {
    *     "levelThreeKey1": "value3",
    *     "levelThreeKey2": 3,
-   *     "levelThreeKey3": [7, 8, 9]
+   *     "levelThreeKey3": [7, 8, 9],
+   *     "levelThreeKey4": {
+   *       "levelFourKey1": 4
+   *     }
    *   }
    *  }
    * }
@@ -81,7 +84,11 @@
    * "levelOneKey4": {
    *   "levelTwoKey1": "value2",
    *   "levelTwoKey2": 2,
-   *   "levelTwoKey3": [4, 5, 6]
+   *   "levelTwoKey3": [4, 5, 6],
+   *   "levelTwoKey4": {
+   *     "levelThreeKey1": "value3",
+   *     "levelThreeKey2": 3,
+   *     "levelThreeKey3": [7, 8, 9]
    *  }
    * }
    ###
@@ -98,7 +105,11 @@
         for levelTwoKey in levelTwoKeys
           levelTwoValue = levelOneValue[levelTwoKey];
           if isObject(levelTwoValue)
-            delete levelOneValue[levelTwoKey]
+            levelThreeKeys = Object.keys(levelTwoValue);
+            for levelThreeKey in levelThreeKeys
+              levelThreeValue = levelTwoValue[levelThreeKey];
+              if isObject(levelThreeValue)
+                delete levelTwoValue[levelThreeKey]
 
   str = (obj, attached) ->
     clonedObj = Object.assign({}, obj)
