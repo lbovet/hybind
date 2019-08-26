@@ -306,12 +306,8 @@
       postEnrich(obj)
     root =
       $id: (fn) -> idFn = fn
-      $postEnrich: (pe) ->
-        postEnrich = pe
-        return
-      $postCollMap: (pcm) ->
-        postCollMap = pcm
-        return
+      $postEnrich: (pe) -> postEnrich = pe
+      $postCollMap: (pcm) -> postCollMap = pcm
     enrich root, url
   hybind.http = http
   hybind
