@@ -47,20 +47,59 @@
       promise(d)
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
+
+  ###*
+  * Returns true if value is an Object. Note that JavaScript arrays and functions are objects,
+  * while (normal) strings and numbers are not.
+  ###
+  isObject = (value) value instanceof Object && !(value instanceof Array)
+
+  ###*
+   * Limits the depth of complex types to 2.
+   * Note: We intentionally avoid recursion here. 
+   * This here
+   * {
+   * "levelOneKey1": "value1",
+   * "levelOneKey2": 1,
+   * "levelOneKey3": [1, 2, 3],
+   * "levelOneKey4": {
+   *   "levelTwoKey1": "value2",
+   *   "levelTwoKey2": 2,
+   *   "levelTwoKey3": [4, 5, 6],
+   *   "levelTwoKey4": {
+   *     "levelThreeKey1": "value3",
+   *     "levelThreeKey2": 3,
+   *     "levelThreeKey3": [7, 8, 9]
+   *   }
+   *  }
+   * }
+   * becomes
+   * {
+   * "levelOneKey1": "value1",
+   * "levelOneKey2": 1,
+   * "levelOneKey3": [1, 2, 3],
+   * "levelOneKey4": {
+   *   "levelTwoKey1": "value2",
+   *   "levelTwoKey2": 2,
+   *   "levelTwoKey3": [4, 5, 6]
+   *  }
+   * }
+   ###
   limitDepth = (object) ->
     if (!(object instanceof Object))
       return;
     if object instanceof Array
       return;
-    firstDepthKeys = Object.keys(object);
-    for firstDepthKey in firstDepthKeys
-      firstDepthChild = object[firstDepthKey];
-      if firstDepthChild instanceof Object && !(firstDepthChild instanceof Array)
-        secondDepthKeys = Object.keys(firstDepthChild);
-        for secondDepthKey in secondDepthKeys
-          secondDepthChild = firstDepthChild[secondDepthKey];
-          if secondDepthChild instanceof Object && !(secondDepthChild instanceof Array)
-            delete firstDepthChild[secondDepthKey]
+    levelOneKeys = Object.keys(object);
+    for levelOneKey in levelOneKeys
+      levelOneValue = object[levelOneKey];
+      if isObject(levelOneValue)
+        levelTwoKeys = Object.keys(levelOneValue);
+        for levelTwoKey in levelTwoKeys
+          levelTwoValue = levelOneValue[levelTwoKey];
+          if isObject(levelTwoValue)
+            delete levelOneValue[levelTwoKey]
+
   str = (obj, attached) ->
     clonedObj = Object.assign({}, obj)
     limitDepth(clonedObj)

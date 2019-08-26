@@ -30,6 +30,6 @@
   },
   "devDependencies": {
     "coffee-script": "^1.10.0",
-    "jasmine-node": "^3.0.0"
+    "jasmine-node": "^1.14.5"
   }
 }
