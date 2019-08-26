@@ -52,7 +52,7 @@
   * Returns true if value is an Object. Note that JavaScript arrays and functions are objects,
   * while (normal) strings and numbers are not.
   ###
-  isObject = (value) value instanceof Object && !(value instanceof Array)
+  isObject = (value) -> value instanceof Object && !(value instanceof Array)
 
   ###*
    * Limits the depth of complex types to 2.
