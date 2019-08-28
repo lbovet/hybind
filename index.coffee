@@ -112,11 +112,11 @@
                 delete levelTwoValue[levelThreeKey]
 
   str = (obj, attached) ->
-    clonedObj = Object.assign({}, obj)
-    limitDepth(clonedObj)
     array = undefined
     root = true
-    JSON.stringify clonedObj, (k,v) ->
+    JSON.stringify obj, (k,v) ->
+      if k == ''
+        limitDepth(v)
       if not root
         if attached and (attached.length == 0 or k in attached) or array
           if not (v instanceof Array)
