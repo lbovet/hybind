@@ -49,74 +49,63 @@
   clean = (url) -> String(url).replace /{.*}/g, '' if url
 
   ###*
-  * Returns true if value is an Object. Note that JavaScript arrays and functions are objects,
-  * while (normal) strings and numbers are not.
-  ###
-  isObject = (value) -> value instanceof Object && !(value instanceof Array)
-
-  ###*
    * Limits the depth of complex types to 2.
    * Note: We intentionally avoid recursion here. 
    * This here
    * {
-   * "levelOneKey1": "value1",
-   * "levelOneKey2": 1,
-   * "levelOneKey3": [1, 2, 3],
-   * "levelOneKey4": {
-   *   "levelTwoKey1": "value2",
-   *   "levelTwoKey2": 2,
-   *   "levelTwoKey3": [4, 5, 6],
-   *   "levelTwoKey4": {
-   *     "levelThreeKey1": "value3",
-   *     "levelThreeKey2": 3,
-   *     "levelThreeKey3": [7, 8, 9],
-   *     "levelThreeKey4": {
-   *       "levelFourKey1": 4
+   * "object": {
+   *   "levelOneKey1": "value2",
+   *   "levelOneKey2": 2,
+   *   "levelOneKey3": [4, 5, 6],
+   *   "levelOneKey4": {
+   *     "levelTwoKey1": "value3",
+   *     "levelTwoKey2": 3,
+   *     "levelTwoKey3": [7, 8, 9],
+   *     "levelTwoKey4": {
+   *       "levelThreeKey1": 4
    *     }
    *   }
    *  }
    * }
    * becomes
    * {
-   * "levelOneKey1": "value1",
-   * "levelOneKey2": 1,
-   * "levelOneKey3": [1, 2, 3],
-   * "levelOneKey4": {
-   *   "levelTwoKey1": "value2",
-   *   "levelTwoKey2": 2,
-   *   "levelTwoKey3": [4, 5, 6],
-   *   "levelTwoKey4": {
-   *     "levelThreeKey1": "value3",
-   *     "levelThreeKey2": 3,
-   *     "levelThreeKey3": [7, 8, 9]
+   * "object": {
+   *   "levelOneKey1": "value2",
+   *   "levelOneKey2": 2,
+   *   "levelOneKey3": [4, 5, 6],
+   *   "levelOneKey4": {
+   *     "levelTwoKey1": "value3",
+   *     "levelTwoKey2": 3,
+   *     "levelTwoKey3": [7, 8, 9]
    *  }
    * }
    ###
-  limitDepth = (object) ->
-    if (!(object instanceof Object))
-      return;
-    if object instanceof Array
-      return;
-    levelOneKeys = Object.keys(object);
-    for levelOneKey in levelOneKeys
-      levelOneValue = object[levelOneKey];
-      if isObject(levelOneValue)
-        levelTwoKeys = Object.keys(levelOneValue);
-        for levelTwoKey in levelTwoKeys
-          levelTwoValue = levelOneValue[levelTwoKey];
-          if isObject(levelTwoValue)
-            levelThreeKeys = Object.keys(levelTwoValue);
-            for levelThreeKey in levelThreeKeys
-              levelThreeValue = levelTwoValue[levelThreeKey];
-              if isObject(levelThreeValue)
-                delete levelTwoValue[levelThreeKey]
-
+  stringify = (val, depth, replacer, space) ->
+    _build = (key, val, depth, o, a) ->
+      if !val or typeof val != 'object'
+        return val
+      else
+        a = Array.isArray(val)
+        if a && depth == 0
+          return val; # keep the array if it is in the last depth
+        JSON.stringify val, (k, v) ->
+          if a or depth > 0
+            if !!replacer
+              v = replacer(k, v)
+            if !k
+              a = Array.isArray(v)
+              val = v
+              return val;
+            !o and (o = if a then [] else {})
+            o[k] = _build(k, v, if a then depth else depth - 1)
+            return
+        o or if !key then {} else undefined
+    JSON.stringify _build('', val, depth), null, space
+  
   str = (obj, attached) ->
     array = undefined
     root = true
-    JSON.stringify obj, (k,v) ->
-      if k == ''
-        limitDepth(v)
+    stringify obj, 3, (k,v) ->
       if not root
         if attached and (attached.length == 0 or k in attached) or array
           if not (v instanceof Array)
