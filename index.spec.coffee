@@ -191,8 +191,8 @@ describe 'hybind', ->
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', url: 'http://localhost/john'
             data: JSON.stringify name: 'john', address: city: name: 'Abanda', toName: 'Oliver'
-        expect(JSON.stringify john).toBe JSON.stringify name : 'john', address : city: name: 'Abanda', toName: 'Oliver', geoPoint: latitude: 1, longitude: 2
-        done()
+          expect(JSON.stringify john).toBe JSON.stringify name : 'john', address : city: name: 'Abanda', toName: 'Oliver', geoPoint: latitude: 1, longitude: 2
+          done()
 
       it 'should not drop properties of type Array on depth level 2 and deeper', (done) ->
         http = @http
@@ -203,8 +203,8 @@ describe 'hybind', ->
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', url: 'http://localhost/john'
             data: JSON.stringify name: 'john', address: city: name: 'Abanda', toName: 'Oliver', frequencies: [{value: 427, unit: 'MHZ'}, {value: 428, unit: 'MHZ'}]
-        expect(JSON.stringify john).toBe JSON.stringify name : 'john', address : city: name: 'Abanda', toName: 'Oliver', frequencies: [{value: 427, unit: 'MHZ'}, {value: 428, unit: 'MHZ'}]
-        done()
+          expect(JSON.stringify john).toBe JSON.stringify name : 'john', address : city: name: 'Abanda', toName: 'Oliver', frequencies: [{value: 427, unit: 'MHZ'}, {value: 428, unit: 'MHZ'}]
+          done()
 
       it 'should support parameters', (done) ->
         http = @http
