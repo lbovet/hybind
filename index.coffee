@@ -144,6 +144,7 @@
           if link
             enrich i, link
             bind i
+    postCollMap = (obj) -> obj;
     collMapper = (obj, coll) ->
       coll.length = 0
       if obj._embedded
@@ -154,6 +155,7 @@
             if link
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
+              postCollMap(coll, item);
             bind item
           break
         delete obj.embedded
@@ -185,6 +187,7 @@
       promise d
     defProp = (obj, name, value) ->
       Object.defineProperty obj, name, configurable: true, enumerable: false, writable: true, value: value
+    postEnrich = (obj) -> obj;
     enrich = (obj, url) ->
       if not obj.$bind
          defProp obj, '$bind', ->
@@ -300,8 +303,11 @@
         cache[link] = item if not cached
         if cb and not cached then cb item
         item
-      obj
-    root = $id: (fn) -> idFn = fn
+      postEnrich(obj)
+    root =
+      $id: (fn) -> idFn = fn
+      $postEnrich: (pe) -> postEnrich = pe
+      $postCollMap: (pcm) -> postCollMap = pcm
     enrich root, url
   hybind.http = http
   hybind
