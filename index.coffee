@@ -47,39 +47,6 @@
       promise(d)
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
-
-  ###*
-   * Limits the depth of complex types to 2.
-   * Note: We intentionally avoid recursion here. 
-   * This here
-   * {
-   * "object": {
-   *   "levelOneKey1": "value2",
-   *   "levelOneKey2": 2,
-   *   "levelOneKey3": [4, 5, 6],
-   *   "levelOneKey4": {
-   *     "levelTwoKey1": "value3",
-   *     "levelTwoKey2": 3,
-   *     "levelTwoKey3": [7, 8, 9],
-   *     "levelTwoKey4": {
-   *       "levelThreeKey1": 4
-   *     }
-   *   }
-   *  }
-   * }
-   * becomes
-   * {
-   * "object": {
-   *   "levelOneKey1": "value2",
-   *   "levelOneKey2": 2,
-   *   "levelOneKey3": [4, 5, 6],
-   *   "levelOneKey4": {
-   *     "levelTwoKey1": "value3",
-   *     "levelTwoKey2": 3,
-   *     "levelTwoKey3": [7, 8, 9]
-   *  }
-   * }
-   ###
   stringify = (val, depth, replacer, space) ->
     _build = (key, val, depth, o, a) ->
       if !val or typeof val != 'object'
@@ -101,7 +68,6 @@
             return
         o or if !key then {} else undefined
     JSON.stringify _build('', val, depth), null, space
-  
   str = (obj, attached) ->
     array = undefined
     root = true
