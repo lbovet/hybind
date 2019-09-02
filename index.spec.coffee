@@ -13,6 +13,10 @@ describe 'hybind', ->
       expect(@api.$bind.self).toBe 'http://localhost'
     it 'should have $bind function', ->
       expect(typeof @api.$bind).toBe 'function'
+    it 'should have $postEnrich function', ->
+      expect(typeof @api.$postEnrich).toBe 'function'
+    it 'should have $postCollMap function', ->
+      expect(typeof @api.$postCollMap).toBe 'function'
 
   describe '$bind', ->
     describe 'without object', ->
