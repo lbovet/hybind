@@ -47,10 +47,31 @@
       promise(d)
   selfLink = (obj) -> obj?.$bind?.self
   clean = (url) -> String(url).replace /{.*}/g, '' if url
+  stringify = (val, depth, replacer, space) ->
+    _build = (key, val, depth, o, a) ->
+      if !val or typeof val != 'object'
+        return val
+      else
+        a = Array.isArray(val)
+        if a && depth == 0
+          return val; # keep the array if it is in the last depth
+        JSON.stringify val, (k, v) ->
+          if a or depth > 0
+            if !!replacer
+              v = replacer(k, v)
+            if !k
+              a = Array.isArray(v)
+              val = v
+              return val;
+            !o and (o = if a then [] else {})
+            o[k] = _build(k, v, if a then depth else depth - 1)
+            return
+        o or if !key then {} else undefined
+    JSON.stringify _build('', val, depth), null, space
   str = (obj, attached) ->
     array = undefined
     root = true
-    JSON.stringify obj, (k,v) ->
+    stringify obj, 3, (k,v) ->
       if not root
         if attached and (attached.length == 0 or k in attached) or array
           if not (v instanceof Array)
@@ -83,7 +104,6 @@
               bind item[name]
           else
             item.$bind.self = clean link.href
-        delete item._links
       if item instanceof Array
         for i in item
           link = i?._links?.self?.href
