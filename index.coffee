@@ -150,7 +150,7 @@
       , d.reject
       promise d
     defProp = (obj, name, value) ->
-      Object.defineProperty obj, name, configurable: true, enumerable: false, writable: true, value: value
+      Object.defineProperty obj, name, configurable: true, enumerable: false, value: value
     enrich = (obj, url) ->
       if not obj.$bind
          defProp obj, '$bind', ->
