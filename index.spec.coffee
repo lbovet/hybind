@@ -46,6 +46,18 @@ describe 'hybind', ->
         obj = @api.$bind 'hello you'
         expect(obj.$bind.ref).toBe 'http://localhost/hello%20you'
 
+    describe '$postEnrich', ->
+      it 'should handle collection items after they are bound', ->
+        postEnrichObj = null;
+        addresses = [
+          { _links: self: href: 'http://localhost/london' },
+          { _links: self: href: 'http://localhost/paris' }
+        ]
+        @api.$postEnrich (obj) ->
+          postEnrichObj = obj;
+        @api.$bind addresses, 'addresses'
+        expect(postEnrichObj).toBe(addresses)
+
     describe 'with object', ->
       it 'should create a self link with given link', ->
         @api.$bind 'j', @john
