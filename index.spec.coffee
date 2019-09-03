@@ -87,7 +87,7 @@ describe 'hybind', ->
         expect(@api.addresses).toBe addresses
 
   describe '$postEnrich', ->
-    it 'should handle collection items after they are bound', ->
+    it 'should set a handler in order to handle collection items after they are bound', ->
       postEnrichObj = null;
       addresses = [
         { _links: self: href: 'http://localhost/london' },
@@ -97,7 +97,7 @@ describe 'hybind', ->
         postEnrichObj = obj;
       @api.$bind addresses, 'addresses'
       expect(postEnrichObj).toBe(addresses)
-    it 'should handle an item when it is loaded with an array as the first embedded member', (done) ->
+    it 'should set a handler in order to handle an item when it is loaded with an array as the first embedded member', (done) ->
       postEnrichObj = null;
       item = {};
       @api.$bind item, 'item'
@@ -111,9 +111,21 @@ describe 'hybind', ->
       item.$load().then ->
         expect(postEnrichObj).toBe(item)
         done()
+    it 'should set a handler in order to handle an item after it is created', (done) ->
+      postEnrichObj = null;
+      item = name: 'item';
+      @api.$bind item, 'item'
+      @api.$postEnrich (obj) ->
+        postEnrichObj = obj;
+      @http.andReturn Q
+        _links: self: href: 'http://localhost/item'
+        name: item.name
+      item.$create().then ->
+        expect(JSON.stringify(postEnrichObj)).toBe(JSON.stringify(item))
+        done()
 
   describe '$postCollMap', ->
-    it 'should handle collection items after they are loaded', (done) ->
+    it 'should set a handler in order to handle collection items after they are loaded', (done) ->
       postCollMapCall = null;
       postCollMapItem = null;
       @api.$postCollMap (coll, item) ->
