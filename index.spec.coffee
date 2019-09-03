@@ -97,6 +97,20 @@ describe 'hybind', ->
         postEnrichObj = obj;
       @api.$bind addresses, 'addresses'
       expect(postEnrichObj).toBe(addresses)
+    it 'should handle an item when it is loaded with an array as the first embedded member', (done) ->
+      postEnrichObj = null;
+      item = {};
+      @api.$bind item, 'item'
+      @api.$postEnrich (obj) ->
+        postEnrichObj = obj;
+      @http.andReturn Q
+        _links: self: href: item.$bind.self
+        _embedded:
+          array: []
+        page: number: 0
+      item.$load().then ->
+        expect(postEnrichObj).toBe(item)
+        done()
 
   describe '$postCollMap', ->
     it 'should handle collection items after they are loaded', (done) ->
@@ -118,7 +132,7 @@ describe 'hybind', ->
             city: 'Paris'
           ]
         page: number: 0
-      
+
       addresses.$load().then ->
         expect(postCollMapCall).toBe(addresses)
         expect(postCollMapItem).toBe(addresses[0])
