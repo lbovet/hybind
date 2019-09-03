@@ -46,18 +46,6 @@ describe 'hybind', ->
         obj = @api.$bind 'hello you'
         expect(obj.$bind.ref).toBe 'http://localhost/hello%20you'
 
-    describe '$postEnrich', ->
-      it 'should handle collection items after they are bound', ->
-        postEnrichObj = null;
-        addresses = [
-          { _links: self: href: 'http://localhost/london' },
-          { _links: self: href: 'http://localhost/paris' }
-        ]
-        @api.$postEnrich (obj) ->
-          postEnrichObj = obj;
-        @api.$bind addresses, 'addresses'
-        expect(postEnrichObj).toBe(addresses)
-
     describe 'with object', ->
       it 'should create a self link with given link', ->
         @api.$bind 'j', @john
@@ -97,6 +85,44 @@ describe 'hybind', ->
         addresses = []
         @api.$bind 'addresses', addresses
         expect(@api.addresses).toBe addresses
+
+  describe '$postEnrich', ->
+    it 'should handle collection items after they are bound', ->
+      postEnrichObj = null;
+      addresses = [
+        { _links: self: href: 'http://localhost/london' },
+        { _links: self: href: 'http://localhost/paris' }
+      ]
+      @api.$postEnrich (obj) ->
+        postEnrichObj = obj;
+      @api.$bind addresses, 'addresses'
+      expect(postEnrichObj).toBe(addresses)
+
+  describe '$postCollMap', ->
+    it 'should handle collection items after they are loaded', (done) ->
+      postCollMapCall = null;
+      postCollMapItem = null;
+      @api.$postCollMap (coll, item) ->
+        postCollMapCall = coll
+        postCollMapItem = item
+      
+      addresses = {}
+      @api.$bind 'addresses', addresses
+      @http.andReturn Q
+        _links: self: href: addresses.$bind.self
+        _embedded:
+          addresses: [
+            city: 'London'
+            _links: self: href: "http://localhost/london"
+          ,
+            city: 'Paris'
+          ]
+        page: number: 0
+      
+      addresses.$load().then ->
+        expect(postCollMapCall).toBe(addresses)
+        expect(postCollMapItem).toBe(addresses[0])
+        done()
 
   describe 'operations on objects', ->
     beforeEach ->
