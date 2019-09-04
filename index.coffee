@@ -110,7 +110,7 @@
           if link
             enrich i, link
             bind i
-    postCollMap = (obj) -> obj;
+    postCollMap = (coll, item) -> {};
     collMapper = (obj, coll) ->
       coll.length = 0
       if obj._embedded
