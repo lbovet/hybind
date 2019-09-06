@@ -13,10 +13,10 @@ describe 'hybind', ->
       expect(@api.$bind.self).toBe 'http://localhost'
     it 'should have $bind function', ->
       expect(typeof @api.$bind).toBe 'function'
-    it 'should have $postEnrich function', ->
-      expect(typeof @api.$postEnrich).toBe 'function'
-    it 'should have $postCollMap function', ->
-      expect(typeof @api.$postCollMap).toBe 'function'
+    it 'should have $onBind function', ->
+      expect(typeof @api.$onBind).toBe 'function'
+    it 'should have $onLoadItem function', ->
+      expect(typeof @api.$onLoadItem).toBe 'function'
 
   describe '$bind', ->
     describe 'without object', ->
@@ -86,51 +86,51 @@ describe 'hybind', ->
         @api.$bind 'addresses', addresses
         expect(@api.addresses).toBe addresses
 
-  describe '$postEnrich', ->
+  describe '$onBind', ->
     it 'should set a handler in order to handle collection items after they are bound', ->
-      postEnrichObj = null;
+      onBindObj = null;
       addresses = [
         { _links: self: href: 'http://localhost/london' },
         { _links: self: href: 'http://localhost/paris' }
       ]
-      @api.$postEnrich (obj) ->
-        postEnrichObj = obj;
+      @api.$onBind (obj) ->
+        onBindObj = obj;
       @api.$bind addresses, 'addresses'
-      expect(postEnrichObj).toBe(addresses)
+      expect(onBindObj).toBe(addresses)
     it 'should set a handler in order to handle an item when it is loaded with an array as the first embedded member', (done) ->
-      postEnrichObj = null;
+      onBindObj = null;
       item = {};
       @api.$bind item, 'item'
-      @api.$postEnrich (obj) ->
-        postEnrichObj = obj;
+      @api.$onBind (obj) ->
+        onBindObj = obj;
       @http.andReturn Q
         _links: self: href: item.$bind.self
         _embedded:
           array: []
         page: number: 0
       item.$load().then ->
-        expect(postEnrichObj).toBe(item)
+        expect(onBindObj).toBe(item)
         done()
     it 'should set a handler in order to handle an item after it is created', (done) ->
-      postEnrichObj = null;
+      onBindObj = null;
       item = name: 'item';
       @api.$bind item, 'item'
-      @api.$postEnrich (obj) ->
-        postEnrichObj = obj;
+      @api.$onBind (obj) ->
+        onBindObj = obj;
       @http.andReturn Q
         _links: self: href: 'http://localhost/item'
         name: item.name
       item.$create().then ->
-        expect(JSON.stringify(postEnrichObj)).toBe(JSON.stringify(item))
+        expect(JSON.stringify(onBindObj)).toBe(JSON.stringify(item))
         done()
 
-  describe '$postCollMap', ->
+  describe '$onLoadItem', ->
     it 'should set a handler in order to handle collection items after they are loaded', (done) ->
-      postCollMapCall = null;
-      postCollMapItem = null;
-      @api.$postCollMap (coll, item) ->
-        postCollMapCall = coll
-        postCollMapItem = item
+      onLoadItemCall = null;
+      onLoadItemItem = null;
+      @api.$onLoadItem (coll, item) ->
+        onLoadItemCall = coll
+        onLoadItemItem = item
       
       addresses = {}
       @api.$bind 'addresses', addresses
@@ -146,8 +146,8 @@ describe 'hybind', ->
         page: number: 0
 
       addresses.$load().then ->
-        expect(postCollMapCall).toBe(addresses)
-        expect(postCollMapItem).toBe(addresses[0])
+        expect(onLoadItemCall).toBe(addresses)
+        expect(onLoadItemItem).toBe(addresses[0])
         done()
 
   describe 'operations on objects', ->
