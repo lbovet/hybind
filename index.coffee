@@ -110,6 +110,7 @@
           if link
             enrich i, link
             bind i
+    onLoadItem = (coll, item) -> return;
     collMapper = (obj, coll) ->
       coll.length = 0
       if obj._embedded
@@ -120,6 +121,7 @@
             if link
               enrich item, link
               item.$bind.ref = coll?.$bind?.self+'/'+link.split('/')[-1..]
+              onLoadItem(coll, item);
             bind item
           break
         delete obj.embedded
@@ -150,7 +152,8 @@
       , d.reject
       promise d
     defProp = (obj, name, value) ->
-      Object.defineProperty obj, name, configurable: true, enumerable: false, value: value
+      Object.defineProperty obj, name, configurable: true, enumerable: false, writable: true, value: value
+    onBind = (obj) -> return;
     enrich = (obj, url) ->
       if not obj.$bind
          defProp obj, '$bind', ->
@@ -266,8 +269,12 @@
         cache[link] = item if not cached
         if cb and not cached then cb item
         item
+      onBind(obj)
       obj
-    root = $id: (fn) -> idFn = fn
+    root =
+      $id: (fn) -> idFn = fn
+      $onBind: (ob) -> onBind = ob
+      $onLoadItem: (oil) -> onLoadItem = oil
     enrich root, url
   hybind.http = http
   hybind
