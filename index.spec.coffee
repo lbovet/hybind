@@ -243,7 +243,9 @@ describe 'hybind', ->
       it 'should issue a PUT request', (done) ->
         http = @http
         john = @john
-        john.errors = [{validationError: 'name too short'}]
+        john.errors = [
+          { validationError: 'name too short' }
+        ]
         response = {
           _links: ''
           _embedded:
@@ -253,6 +255,20 @@ describe 'hybind', ->
         http.andReturn Q response
         john.$save().then (obj) ->
           expect(obj).toBe response
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT', url: 'http://localhost/john'
+            data: JSON.stringify john
+          done()
+          
+      it 'should issue a PUT request and ignore the response', (done) ->
+        http = @http
+        john = @john
+        john.errors = [
+          { validationError: 'name too short' }
+        ]
+        http.andReturn Q null
+        john.$save().then (obj) ->
+          expect(obj).toBe john
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', url: 'http://localhost/john'
             data: JSON.stringify john
