@@ -240,7 +240,7 @@ describe 'hybind', ->
           done()
 
     describe '$save', ->
-      it 'should issue a PUT request', (done) ->
+      it 'should issue a PUT request and return a promise that resolves with the model object that corresponds to the payload in the response from the server (if there is one)', (done) ->
         http = @http
         john = @john
         john.errors = [
@@ -249,7 +249,7 @@ describe 'hybind', ->
         response = {
           _links: ''
           _embedded:
-            name: john.name
+            name: john.name # remain unchanged
             errors: [] # the validation error is gone
         }
         http.andReturn Q response
@@ -260,7 +260,7 @@ describe 'hybind', ->
             data: JSON.stringify john
           done()
           
-      it 'should issue a PUT request and ignore the response', (done) ->
+      it 'should issue a PUT request and return a promise that resolves with the (unchanged) model object if there is no payload in the response from the server', (done) ->
         http = @http
         john = @john
         john.errors = [
