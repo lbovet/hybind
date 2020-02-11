@@ -240,14 +240,38 @@ describe 'hybind', ->
           done()
 
     describe '$save', ->
-      it 'should issue a PUT request', (done) ->
+      it 'should issue a PUT request and return a promise that resolves with the model object that corresponds to the payload in the response from the server (if there is one)', (done) ->
         http = @http
         john = @john
-        @john.$save().then (obj) ->
+        john.errors = [
+          { validationError: 'name too short' }
+        ]
+        response = {
+          _links: ''
+          _embedded:
+            name: john.name # remain unchanged
+            errors: [] # the validation error is gone
+        }
+        http.andReturn Q response
+        john.$save().then (obj) ->
+          expect(obj).toBe response
+          expect(http).toHaveBeenCalledWith jasmine.objectContaining
+            method: 'PUT', url: 'http://localhost/john'
+            data: JSON.stringify john
+          done()
+          
+      it 'should issue a PUT request and return a promise that resolves with the (unchanged) model object if there is no payload in the response from the server', (done) ->
+        http = @http
+        john = @john
+        john.errors = [
+          { validationError: 'name too short' }
+        ]
+        http.andReturn Q null
+        john.$save().then (obj) ->
           expect(obj).toBe john
           expect(http).toHaveBeenCalledWith jasmine.objectContaining
             method: 'PUT', url: 'http://localhost/john'
-            data: JSON.stringify name: 'john'
+            data: JSON.stringify john
           done()
 
       it 'should drop properties of type object on depth level 2 and deeper', (done) ->
@@ -298,11 +322,12 @@ describe 'hybind', ->
     describe '$delete', ->
       it 'should DELETE the loaded self link', (done) ->
         http = @http
-        http.andReturn Q _links: self: href: 'http://remotehost/john'
+        response = _links: self: href: 'http://remotehost/john'
+        http.andReturn Q response
         john = @john
         john.$load().then ->
           john.$delete().then (obj) ->
-            expect(obj).toBe john
+            expect(obj).toBe response
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://remotehost/john'
             done()
@@ -367,12 +392,13 @@ describe 'hybind', ->
 
       it 'should DELETE the association ref link of loaded objects', (done) ->
         http = @http
-        http.andReturn Q _links: self: href: 'http://remotehost/john'
+        response = _links: self: href: 'http://remotehost/john'
+        http.andReturn Q response
         john = @john
         john.$load().then ->
           http.reset()
           john.$remove().then (obj) ->
-            expect(obj).toBe john
+            expect(obj).toBe response
             expect(http).toHaveBeenCalledWith jasmine.objectContaining
               method: 'DELETE', url: 'http://localhost/john'
             done()

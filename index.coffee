@@ -148,7 +148,7 @@
             data = JSON.parse(data)
         catch e
           d.reject e
-        d.resolve result or data
+        d.resolve data or result
       , d.reject
       promise d
     defProp = (obj, name, value) ->
